@@ -51,7 +51,7 @@ jobs:
           google-chrome --version
 
       - name: Render video
-        run: npx remotion render MoneyStoryShorts out/money-story-shorts.mp4 --codec=h264 --concurrency=2
+        run: npx remotion render TestYellow out/money-story-shorts.mp4 --codec=h264 --concurrency=2
 
       - name: Verify output
         run: |
