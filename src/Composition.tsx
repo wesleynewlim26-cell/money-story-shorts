@@ -20,7 +20,6 @@ const easeOutBack = (t: number) => {
   const c3 = c1 + 1;
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
 };
-const easeInOut = (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 const mulberry32 = (a: number) => {
   return () => {
     let t = (a += 0x6D2B79F5);
@@ -30,16 +29,6 @@ const mulberry32 = (a: number) => {
   };
 };
 
-function designFrame(ctx: CanvasRenderingContext2D, w: number, h: number, fn: () => void) {
-  ctx.save();
-  const scale = Math.min(w / 720, h / 1280);
-  ctx.translate((w - 720 * scale) / 2, (h - 1280 * scale) / 2);
-  ctx.scale(scale, scale);
-  fn();
-  ctx.restore();
-}
-
-const DURATION = 1800;
 const FPS = 30;
 const rng = mulberry32(12345);
 
@@ -58,7 +47,6 @@ const COLORS = {
   red: "#cc3333",
   green: "#33cc77",
   white: "#ffffff",
-  shadow: "rgba(0,0,0,0.6)",
 };
 
 function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -648,15 +636,15 @@ function drawCaption(ctx: CanvasRenderingContext2D, w: number, h: number, text: 
   ctx.restore();
 }
 
+// Scene draw functions - each receives local progress 0-1 within its scene
 function drawScene1(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const paperProg = clamp(p * 600, 0, 1);
-  drawNewspaper(ctx, w/2, h/2 - 100, 1.2, paperProg);
-  drawCaption(ctx, w, h, "MENARA EIFFEL BERKARAT", clamp((p - 0) / 0.05, 0, 1));
+  drawNewspaper(ctx, w/2, h/2 - 100, 1.2, clamp(p, 0, 1));
+  drawCaption(ctx, w, h, "MENARA EIFFEL BERKARAT", clamp(p * 20, 0, 1));
 }
 
 function drawScene2(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 3/60) * 30, 0, 1);
-  const blink = Math.floor(p * FPS) % 60 < 3;
+  const charProg = clamp(p, 0, 1);
+  const blink = Math.floor(p * FPS * 60) % 60 < 3;
   drawCharacter(ctx, w/2, h/2 + 50, 0.8 * easeOutBack(charProg), {
     hat: true,
     suitColor: "#0a0a1a",
@@ -665,17 +653,17 @@ function drawScene2(ctx: CanvasRenderingContext2D, w: number, h: number, p: numb
     headTilt: Math.sin(p * 2) * 0.05,
   });
   drawNewspaper(ctx, w/2 - 20, h/2 + 180, 0.6, 1);
-  drawCaption(ctx, w, h, "VICTOR LUSTIG:\nPENALIP PALING BRILIAN", clamp((p - 0.05) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "VICTOR LUSTIG:\nPENALIP PALING BRILIAN", clamp(p * 20, 0, 1));
 }
 
 function drawScene3(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 6/60) * 25, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6);
-  drawCaption(ctx, w, h, "HOTEL MEWAH • 6 DEALER BESI", clamp((p - 0.1) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "HOTEL MEWAH \u2022 6 DEALER BESI", clamp(p * 20, 0, 1));
 }
 
 function drawScene4(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 10/60) * 25, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, 2);
   const docScale = 1 + 0.5 * easeOut(charProg);
   ctx.save();
@@ -684,22 +672,22 @@ function drawScene4(ctx: CanvasRenderingContext2D, w: number, h: number, p: numb
   ctx.translate(-w/2, -h/2);
   drawHotelScene(ctx, w/2, h/2 + 20, 1, 6, 2);
   ctx.restore();
-  drawCaption(ctx, w, h, "7.000 TON BESI • RAHASIA", clamp((p - 0.167) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "7.000 TON BESI \u2022 RAHASIA", clamp(p * 20, 0, 1));
 }
 
 function drawScene5(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 13/60) * 25, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, 2);
   drawCharacter(ctx, w/2 - 20, h/2 - 20, 0.6, {
     suitColor: "#2a2a3e",
     mouth: "concerned",
-    blink: Math.floor(p * FPS) % 40 < 2,
+    blink: Math.floor(p * FPS * 60) % 40 < 2,
   });
-  drawCaption(ctx, w, h, "POISSON: DEALER BARU,\nAMBISIUS TAPI RAGU", clamp((p - 0.217) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "POISSON: DEALER BARU,\nAMBISIUS TAPI RAGU", clamp(p * 20, 0, 1));
 }
 
 function drawScene6(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 17/60) * 25, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, 2);
   drawCharacter(ctx, w/2 + 10, h/2 - 10, 0.5, {
     hat: true,
@@ -716,25 +704,25 @@ function drawScene6(ctx: CanvasRenderingContext2D, w: number, h: number, p: numb
     ctx.lineTo(w/2 + 70, h/2 - 25 + i * 8);
     ctx.stroke();
   }
-  drawCaption(ctx, w, h, "SUAP = BUKTI KEASLIAN", clamp((p - 0.283) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "SUAP = BUKTI KEASLIAN", clamp(p * 20, 0, 1));
 }
 
 function drawScene7(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 21/60) * 33, 0, 1);
+  const charProg = clamp(p, 0, 1);
   const moneyFloat = p * 2;
   drawHotelScene(ctx, w/2, h/2 + 20, 1, 6, 2);
   drawBriefcase(ctx, w/2, h/2 + 120, 0.8, charProg, moneyFloat);
-  drawCaption(ctx, w, h, "KOPER PENUH UANG • KE VIENNA", clamp((p - 0.35) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "KOPER PENUH UANG \u2022 KE VIENNA", clamp(p * 20, 0, 1));
 }
 
 function drawScene8(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 24/60) * 33, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawPoliceStation(ctx, w/2, h/2 + 50, 1, charProg);
-  drawCaption(ctx, w, h, "TIDAK LAPOR • MALU", clamp((p - 0.4) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "TIDAK LAPOR \u2022 MALU", clamp(p * 20, 0, 1));
 }
 
 function drawScene9(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 27/60) * 33, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, -1);
   if (charProg > 0.3) {
     ctx.save();
@@ -754,11 +742,11 @@ function drawScene9(ctx: CanvasRenderingContext2D, w: number, h: number, p: numb
     ctx.fillText("DEALER BARU", 0, 32);
     ctx.restore();
   }
-  drawCaption(ctx, w, h, "1 BULAN KEMUDIAN • DEALER BARU", clamp((p - 0.45) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "1 BULAN KEMUDIAN \u2022 DEALER BARU", clamp(p * 20, 0, 1));
 }
 
 function drawScene10(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 30/60) * 25, 0, 1);
+  const charProg = clamp(p, 0, 1);
   const speed = 1 + charProg;
   drawHotelScene(ctx, w/2, h/2 + 20, 1, 6);
   ctx.strokeStyle = "rgba(255,187,0,0.6)";
@@ -781,11 +769,11 @@ function drawScene10(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.font = "bold 20px monospace";
   ctx.textAlign = "center";
   ctx.fillText("2x LEBIH CEPAT", w/2, 68);
-  drawCaption(ctx, w, h, "2x LEBIH CEPAT • UANG LAGI", clamp((p - 0.5) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "2x LEBIH CEPAT \u2022 UANG LAGI", clamp(p * 20, 0, 1));
 }
 
 function drawScene11(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 34/60) * 33, 0, 1);
+  const charProg = clamp(p, 0, 1);
   const splitX = w/2 + lerp(0, w/2, charProg);
   ctx.save();
   ctx.beginPath();
@@ -807,19 +795,19 @@ function drawScene11(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.lineTo(splitX, h);
   ctx.stroke();
   ctx.setLineDash([]);
-  drawCaption(ctx, w, h, "KALI INI: LAPOR KE POLISI", clamp((p - 0.567) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "KALI INI: LAPOR KE POLISI", clamp(p * 20, 0, 1));
 }
 
 function drawScene12(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp((p - 37/60) * 33, 0, 1);
+  const charProg = clamp(p, 0, 1);
   drawShip(ctx, w/2, h/2 + 100, 1, charProg);
-  drawCaption(ctx, w, h, "MARK SELANJUTNYA: AL CAPONE", clamp((p - 0.617) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "MARK SELANJUTNYA: AL CAPONE", clamp(p * 20, 0, 1));
 }
 
 function drawScene13(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
   const glowPulse = p * 0.5;
   drawEiffelNight(ctx, w/2, h/2, 1, glowPulse);
-  drawCaption(ctx, w, h, "MENARA EIFFEL MASIH BERDIRI", clamp((p - 0.667) / 0.05, 0, 1));
+  drawCaption(ctx, w, h, "MENARA EIFFEL MASIH BERDIRI", clamp(p * 20, 0, 1));
 }
 
 function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
@@ -831,7 +819,7 @@ function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.fillStyle = COLORS.gold;
   ctx.font = "bold 48px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("💰", w/2, h/2 - 50);
+  ctx.fillText("\u{1F4B0}", w/2, h/2 - 50);
   ctx.font = "bold 24px sans-serif";
   ctx.fillStyle = COLORS.text;
   ctx.fillText("FOLLOW UNTUK", w/2, h/2 + 20);
@@ -841,63 +829,40 @@ function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.fillText("@wealthstock.id", w/2, h/2 + 120);
 }
 
+// Main draw function - routes to correct scene based on global progress
 function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, progress: number, frame: number) {
-  designFrame(ctx, w, h, () => {
-    ctx.fillStyle = COLORS.bg;
-    ctx.fillRect(0, 0, 720, 1280);
-    
-    if (progress < 3/60) {
-      drawScene1(ctx, 720, 1280, progress * 60 / 3);
-    } else if (progress < 6/60) {
-      drawScene2(ctx, 720, 1280, (progress - 3/60) * 60 / 3);
-    } else if (progress < 10/60) {
-      drawScene3(ctx, 720, 1280, (progress - 6/60) * 60 / 4);
-    } else if (progress < 13/60) {
-      drawScene4(ctx, 720, 1280, (progress - 10/60) * 60 / 3);
-    } else if (progress < 17/60) {
-      drawScene5(ctx, 720, 1280, (progress - 13/60) * 60 / 4);
-    } else if (progress < 21/60) {
-      drawScene6(ctx, 720, 1280, (progress - 17/60) * 60 / 4);
-    } else if (progress < 24/60) {
-      drawScene7(ctx, 720, 1280, (progress - 21/60) * 60 / 3);
-    } else if (progress < 27/60) {
-      drawScene8(ctx, 720, 1280, (progress - 24/60) * 60 / 3);
-    } else if (progress < 30/60) {
-      drawScene9(ctx, 720, 1280, (progress - 27/60) * 60 / 3);
-    } else if (progress < 34/60) {
-      drawScene10(ctx, 720, 1280, (progress - 30/60) * 60 / 4);
-    } else if (progress < 37/60) {
-      drawScene11(ctx, 720, 1280, (progress - 34/60) * 60 / 3);
-    } else if (progress < 40/60) {
-      drawScene12(ctx, 720, 1280, (progress - 37/60) * 60 / 3);
-    } else if (progress < 43/60) {
-      drawScene13(ctx, 720, 1280, (progress - 40/60) * 60 / 3);
-    } else {
-      drawScene14(ctx, 720, 1280, (progress - 43/60) * 60 / 17);
-    }
-    
-    const vigGrad = ctx.createRadialGradient(360, 640, 0, 360, 640, 500);
-    vigGrad.addColorStop(0, "rgba(0,0,0,0)");
-    vigGrad.addColorStop(1, "rgba(0,0,0,0.5)");
-    ctx.fillStyle = vigGrad;
-    ctx.fillRect(0, 0, 720, 1280);
-    
-    const imgData = ctx.createImageData(720, 1280);
-    const data = imgData.data;
-    const grainRng = mulberry32(frame * 9973);
-    for (let i = 0; i < data.length; i += 4) {
-      const g = (grainRng() - 0.5) * 20;
-      data[i] = g;
-      data[i + 1] = g * 0.9;
-      data[i + 2] = g * 0.7;
-      data[i + 3] = 255;
-    }
-    ctx.globalCompositeOperation = "overlay";
-    ctx.globalAlpha = 0.08;
-    ctx.putImageData(imgData, 0, 0);
-    ctx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = 1;
-  });
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, w, h);
+  
+  if (progress < 3/60) {
+    drawScene1(ctx, w, h, progress * 60 / 3);
+  } else if (progress < 6/60) {
+    drawScene2(ctx, w, h, (progress - 3/60) * 60 / 3);
+  } else if (progress < 10/60) {
+    drawScene3(ctx, w, h, (progress - 6/60) * 60 / 4);
+  } else if (progress < 13/60) {
+    drawScene4(ctx, w, h, (progress - 10/60) * 60 / 3);
+  } else if (progress < 17/60) {
+    drawScene5(ctx, w, h, (progress - 13/60) * 60 / 4);
+  } else if (progress < 21/60) {
+    drawScene6(ctx, w, h, (progress - 17/60) * 60 / 4);
+  } else if (progress < 24/60) {
+    drawScene7(ctx, w, h, (progress - 21/60) * 60 / 3);
+  } else if (progress < 27/60) {
+    drawScene8(ctx, w, h, (progress - 24/60) * 60 / 3);
+  } else if (progress < 30/60) {
+    drawScene9(ctx, w, h, (progress - 27/60) * 60 / 3);
+  } else if (progress < 34/60) {
+    drawScene10(ctx, w, h, (progress - 30/60) * 60 / 4);
+  } else if (progress < 37/60) {
+    drawScene11(ctx, w, h, (progress - 34/60) * 60 / 3);
+  } else if (progress < 40/60) {
+    drawScene12(ctx, w, h, (progress - 37/60) * 60 / 3);
+  } else if (progress < 43/60) {
+    drawScene13(ctx, w, h, (progress - 40/60) * 60 / 3);
+  } else {
+    drawScene14(ctx, w, h, (progress - 43/60) * 60 / 17);
+  }
 }
 
 const MoneyStoryCanvas = ({ frame, progress }: { frame: number; progress: number }) => {
