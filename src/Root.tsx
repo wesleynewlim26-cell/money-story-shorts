@@ -1,9 +1,9 @@
-import { MyComposition } from "./Composition";
+import { StillComposition } from "./StillFrames";
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      <MyComposition />
+      <StillComposition />
     </>
   );
 };

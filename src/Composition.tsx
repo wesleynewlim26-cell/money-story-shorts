@@ -30,6 +30,7 @@ const mulberry32 = (a: number) => {
 };
 
 const FPS = 30;
+export const FPS_CONST = FPS;
 const rng = mulberry32(12345);
 
 const COLORS = {
@@ -830,7 +831,7 @@ function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
 }
 
 // Main draw function - routes to correct scene based on global progress
-function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, progress: number, frame: number) {
+export function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, progress: number, frame: number) {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
   
