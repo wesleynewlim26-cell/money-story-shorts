@@ -1,4 +1,5 @@
-import { Composition, CalculateMetadataFunction, HtmlInCanvas, useCurrentFrame, useVideoConfig } from "remotion";
+import { Composition, CalculateMetadataFunction, useCurrentFrame, useVideoConfig } from "remotion";
+import { useEffect, useRef } from "react";
 
 type Props = {};
 
@@ -1024,90 +1025,92 @@ function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
   ctx.fillText("@wealthstock.id", w/2, h/2 + 120);
 }
 
-function GoldenHourglassCanvas({ frame, progress }: { frame: number; progress: number }) {
-  const onPaint = (ctx: CanvasRenderingContext2D) => {
-    const w = 720;
-    const h = 1280;
+function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, progress: number, frame: number) {
+  designFrame(ctx, w, h, () => {
+    // Clear
+    ctx.fillStyle = COLORS.bg;
+    ctx.fillRect(0, 0, 720, 1280);
     
-    designFrame(ctx, w, h, () => {
-      // Clear
-      ctx.fillStyle = COLORS.bg;
-      ctx.fillRect(0, 0, 720, 1280);
-      
-      // Scene routing based on progress (0-1 over 60 seconds)
-      // Each scene ~3-4 seconds = ~0.05-0.067 progress
-      
-      if (progress < 3/60) {
-        drawScene1(ctx, 720, 1280, progress * 60 / 3);
-      } else if (progress < 6/60) {
-        drawScene2(ctx, 720, 1280, (progress - 3/60) * 60 / 3);
-      } else if (progress < 10/60) {
-        drawScene3(ctx, 720, 1280, (progress - 6/60) * 60 / 4);
-      } else if (progress < 13/60) {
-        drawScene4(ctx, 720, 1280, (progress - 10/60) * 60 / 3);
-      } else if (progress < 17/60) {
-        drawScene5(ctx, 720, 1280, (progress - 13/60) * 60 / 4);
-      } else if (progress < 21/60) {
-        drawScene6(ctx, 720, 1280, (progress - 17/60) * 60 / 4);
-      } else if (progress < 24/60) {
-        drawScene7(ctx, 720, 1280, (progress - 21/60) * 60 / 3);
-      } else if (progress < 27/60) {
-        drawScene8(ctx, 720, 1280, (progress - 24/60) * 60 / 3);
-      } else if (progress < 30/60) {
-        drawScene9(ctx, 720, 1280, (progress - 27/60) * 60 / 3);
-      } else if (progress < 34/60) {
-        drawScene10(ctx, 720, 1280, (progress - 30/60) * 60 / 4);
-      } else if (progress < 37/60) {
-        drawScene11(ctx, 720, 1280, (progress - 34/60) * 60 / 3);
-      } else if (progress < 40/60) {
-        drawScene12(ctx, 720, 1280, (progress - 37/60) * 60 / 3);
-      } else if (progress < 43/60) {
-        drawScene13(ctx, 720, 1280, (progress - 40/60) * 60 / 3);
-      } else {
-        drawScene14(ctx, 720, 1280, (progress - 43/60) * 60 / 17);
-      }
-      
-      // Vignette
-      const vigGrad = ctx.createRadialGradient(360, 640, 0, 360, 640, 500);
-      vigGrad.addColorStop(0, "rgba(0,0,0,0)");
-      vigGrad.addColorStop(1, "rgba(0,0,0,0.5)");
-      ctx.fillStyle = vigGrad;
-      ctx.fillRect(0, 0, 720, 1280);
-      
-      // Film grain
-      const imgData = ctx.createImageData(720, 1280);
-      const data = imgData.data;
-      const grainRng = mulberry32(frame * 9973);
-      for (let i = 0; i < data.length; i += 4) {
-        const g = (grainRng() - 0.5) * 20;
-        data[i] = g;
-        data[i + 1] = g * 0.9;
-        data[i + 2] = g * 0.7;
-        data[i + 3] = 255;
-      }
-      ctx.globalCompositeOperation = "overlay";
-      ctx.globalAlpha = 0.08;
-      ctx.putImageData(imgData, 0, 0);
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 1;
-    });
-  };
-  
-  return (
-    <HtmlInCanvas
-      width={720}
-      height={1280}
-      onPaint={onPaint}
-    />
-  );
+    // Scene routing based on progress (0-1 over 60 seconds)
+    if (progress < 3/60) {
+      drawScene1(ctx, 720, 1280, progress * 60 / 3);
+    } else if (progress < 6/60) {
+      drawScene2(ctx, 720, 1280, (progress - 3/60) * 60 / 3);
+    } else if (progress < 10/60) {
+      drawScene3(ctx, 720, 1280, (progress - 6/60) * 60 / 4);
+    } else if (progress < 13/60) {
+      drawScene4(ctx, 720, 1280, (progress - 10/60) * 60 / 3);
+    } else if (progress < 17/60) {
+      drawScene5(ctx, 720, 1280, (progress - 13/60) * 60 / 4);
+    } else if (progress < 21/60) {
+      drawScene6(ctx, 720, 1280, (progress - 17/60) * 60 / 4);
+    } else if (progress < 24/60) {
+      drawScene7(ctx, 720, 1280, (progress - 21/60) * 60 / 3);
+    } else if (progress < 27/60) {
+      drawScene8(ctx, 720, 1280, (progress - 24/60) * 60 / 3);
+    } else if (progress < 30/60) {
+      drawScene9(ctx, 720, 1280, (progress - 27/60) * 60 / 3);
+    } else if (progress < 34/60) {
+      drawScene10(ctx, 720, 1280, (progress - 30/60) * 60 / 4);
+    } else if (progress < 37/60) {
+      drawScene11(ctx, 720, 1280, (progress - 34/60) * 60 / 3);
+    } else if (progress < 40/60) {
+      drawScene12(ctx, 720, 1280, (progress - 37/60) * 60 / 3);
+    } else if (progress < 43/60) {
+      drawScene13(ctx, 720, 1280, (progress - 40/60) * 60 / 3);
+    } else {
+      drawScene14(ctx, 720, 1280, (progress - 43/60) * 60 / 17);
+    }
+    
+    // Vignette
+    const vigGrad = ctx.createRadialGradient(360, 640, 0, 360, 640, 500);
+    vigGrad.addColorStop(0, "rgba(0,0,0,0)");
+    vigGrad.addColorStop(1, "rgba(0,0,0,0.5)");
+    ctx.fillStyle = vigGrad;
+    ctx.fillRect(0, 0, 720, 1280);
+    
+    // Film grain
+    const imgData = ctx.createImageData(720, 1280);
+    const data = imgData.data;
+    const grainRng = mulberry32(frame * 9973);
+    for (let i = 0; i < data.length; i += 4) {
+      const g = (grainRng() - 0.5) * 20;
+      data[i] = g;
+      data[i + 1] = g * 0.9;
+      data[i + 2] = g * 0.7;
+      data[i + 3] = 255;
+    }
+    ctx.globalCompositeOperation = "overlay";
+    ctx.globalAlpha = 0.08;
+    ctx.putImageData(imgData, 0, 0);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 1;
+  });
 }
 
 export const MoneyStoryShorts = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   const progress = frame / durationInFrames;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  return <GoldenHourglassCanvas frame={frame} progress={progress} />;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    drawFrame(ctx, 720, 1280, progress, frame);
+  }, [frame, progress]);
+  
+  return (
+    <canvas
+      ref={canvasRef}
+      width={720}
+      height={1280}
+      style={{ width: 720, height: 1280 }}
+    />
+  );
 };
 
 export const MyComposition = () => {
