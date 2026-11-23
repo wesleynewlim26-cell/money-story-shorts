@@ -53,7 +53,7 @@ jobs:
       - name: Render still frames
         run: |
           for i in {1..14}; do
-            npx remotion render "Scene${i}Still" "out/scene${i}.png" --image-format=png --concurrency=1
+            npx remotion still "Scene${i}Still" "out/scene${i}.png" --concurrency=1
           done
 
       - name: Verify output
