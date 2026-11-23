@@ -1025,12 +1025,9 @@ function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: num
 }
 
 function GoldenHourglassCanvas({ frame, progress }: { frame: number; progress: number }) {
-  const onPaint = ({ canvas }: any) => {
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    
-    const w = canvas.width;
-    const h = canvas.height;
+  const onPaint = (ctx: CanvasRenderingContext2D) => {
+    const w = 720;
+    const h = 1280;
     
     designFrame(ctx, w, h, () => {
       // Clear
