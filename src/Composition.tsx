@@ -1,4 +1,4 @@
-import { Composition, CalculateMetadataFunction, useCurrentFrame, useVideoConfig, Canvas } from "remotion";
+import { Composition, CalculateMetadataFunction, useCurrentFrame, useVideoConfig, HtmlInCanvas } from "remotion";
 
 type Props = {};
 
@@ -88,7 +88,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.translate(x, y);
   ctx.scale(scale, scale);
   
-  // Body
   ctx.fillStyle = suitColor;
   ctx.strokeStyle = COLORS.outline;
   ctx.lineWidth = 3;
@@ -105,7 +104,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.fill();
   ctx.stroke();
   
-  // Lapels
   ctx.fillStyle = "#0a0a1a";
   ctx.beginPath();
   ctx.moveTo(-5, -5);
@@ -118,7 +116,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.lineTo(5, 30);
   ctx.fill();
   
-  // Tie
   ctx.fillStyle = COLORS.gold;
   ctx.beginPath();
   ctx.moveTo(0, 5);
@@ -127,19 +124,16 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.fill();
   ctx.stroke();
   
-  // Head
   const headY = -50;
   ctx.save();
   ctx.translate(0, headY);
   ctx.rotate(headTilt);
   
-  // Head shadow (hard, one side)
   ctx.fillStyle = "rgba(0,0,0,0.4)";
   ctx.beginPath();
   ctx.ellipse(8, 8, 42, 38, 0, 0, TAU);
   ctx.fill();
   
-  // Head base
   ctx.fillStyle = "#e8d5b7";
   ctx.strokeStyle = COLORS.outline;
   ctx.lineWidth = 4;
@@ -148,7 +142,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.fill();
   ctx.stroke();
   
-  // Hat
   if (hat) {
     ctx.fillStyle = "#0a0a1a";
     ctx.beginPath();
@@ -164,7 +157,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
     ctx.stroke();
   }
   
-  // Eyes
   if (!blink) {
     ctx.fillStyle = "#000000";
     ctx.beginPath();
@@ -194,7 +186,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
     ctx.stroke();
   }
   
-  // Eyebrows
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = 3;
   ctx.lineCap = "round";
@@ -207,7 +198,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.lineTo(22, -16);
   ctx.stroke();
   
-  // Mouth
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = 3;
   ctx.lineCap = "round";
@@ -238,7 +228,6 @@ function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scal
     ctx.stroke();
   }
   
-  // Hard shadow on face
   ctx.fillStyle = "rgba(0,0,0,0.25)";
   ctx.beginPath();
   ctx.moveTo(0, -36);
@@ -913,13 +902,18 @@ function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, progress
 
 const MoneyStoryCanvas = ({ frame, progress }: { frame: number; progress: number }) => {
   return (
-    <Canvas
+    <HtmlInCanvas
       width={720}
       height={1280}
-      draw={(ctx, size) => {
-        drawFrame(ctx, size.width, size.height, progress, frame);
+      onPaint={(params: any) => {
+        const canvas = params.canvas || params;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        drawFrame(ctx, 720, 1280, progress, frame);
       }}
-    />
+    >
+      <div />
+    </HtmlInCanvas>
   );
 };
 
