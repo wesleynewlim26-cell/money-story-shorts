@@ -50,17 +50,22 @@ jobs:
           sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
           google-chrome --version
 
-      - name: Render video
-        run: npx remotion render MoneyStoryShorts out/money-story-shorts.mp4 --codec=h264 --concurrency=2
+      - name: Render still frames
+        run: |
+          for i in {1..14}; do
+            npx remotion render "Scene${i}Still" "out/scene${i}.png" --codec=png --concurrency=1
+          done
 
       - name: Verify output
         run: |
-          ls -la out/money-story-shorts.mp4
-          file out/money-story-shorts.mp4
+          for i in {1..14}; do
+            ls -la "out/scene${i}.png"
+            file "out/scene${i}.png"
+          done
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: money-story-shorts-video
-          path: out/money-story-shorts.mp4
+          name: scene-stills
+          path: out/scene*.png
           retention-days: 30
