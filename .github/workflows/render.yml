@@ -50,22 +50,21 @@ jobs:
           sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
           google-chrome --version
 
-      - name: Render still frames
+      - name: Build bundle
+        run: npm run build
+
+      - name: Render scene 1 still (mid-frame 44)
         run: |
-          for i in {1..14}; do
-            npx remotion still "Scene${i}Still" "out/scene${i}.png" --concurrency=1
-          done
+          npx remotion still MoneyStory out/scene-01-mid.png --frame=44 --props=./data/props.json --overwrite
 
       - name: Verify output
         run: |
-          for i in {1..14}; do
-            ls -la "out/scene${i}.png"
-            file "out/scene${i}.png"
-          done
+          ls -la out/scene-01-mid.png
+          file out/scene-01-mid.png
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: scene-stills
-          path: out/scene*.png
+          name: scene-01-still
+          path: out/scene-01-mid.png
           retention-days: 30

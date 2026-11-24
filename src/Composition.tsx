@@ -1,4 +1,12 @@
-import { Composition, CalculateMetadataFunction, useCurrentFrame, useVideoConfig, HtmlInCanvas } from "remotion";
+import {
+  Composition,
+  CalculateMetadataFunction,
+  useCurrentFrame,
+  useVideoConfig,
+  AbsoluteFill,
+  Sequence,
+} from "remotion";
+import { GoogleFont, Text } from "@remotion/google-fonts";
 
 type Props = {};
 
@@ -11,890 +19,542 @@ const calculateMetadata: CalculateMetadataFunction<Props> = () => {
   };
 };
 
-const TAU = Math.PI * 2;
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-const easeOutBack = (t: number) => {
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-};
-const mulberry32 = (a: number) => {
-  return () => {
-    let t = (a += 0x6D2B79F5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-};
-
 const FPS = 30;
-export const FPS_CONST = FPS;
-const rng = mulberry32(12345);
+const SCENE_1_START = 0;
+const SCENE_1_END = 89;
+const SCENE_1_DURATION = SCENE_1_END - SCENE_1_START + 1;
 
-const COLORS = {
-  bg: "#0a0a1a",
-  paper: "#1a1a2e",
-  paperLight: "#252540",
-  outline: "#000000",
-  text: "#f0e6d2",
-  textDim: "#a09880",
-  gold: "#ffd700",
-  goldDim: "#ccac00",
-  amber: "#ffb700",
-  warmLight: "#ffaa44",
-  coolLight: "#44aaff",
-  red: "#cc3333",
-  green: "#33cc77",
-  white: "#ffffff",
+const interpolate = (
+  frame: number,
+  inputRange: [number, number],
+  outputRange: [number, number],
+  extrapolate: "clamp" | "extend" = "clamp"
+): number => {
+  const [inMin, inMax] = inputRange;
+  const [outMin, outMax] = outputRange;
+  const t = (frame - inMin) / (inMax - inMin);
+  const clampedT = extrapolate === "clamp" ? Math.max(0, Math.min(1, t)) : t;
+  return outMin + (outMax - outMin) * clampedT;
 };
 
-function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-}
+// Newspaper SVG component - fills 80%+ width, full-bleed
+const Newspaper = ({ progress }: { progress: number }) => {
+  const scale = interpolate(progress * SCENE_1_DURATION, [0, SCENE_1_DURATION], [0.3, 1.05]);
+  const opacity = interpolate(progress * SCENE_1_DURATION, [0, 15], [0, 1]);
 
-function drawCharacter(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, opts: {
-  headTilt?: number;
-  blink?: boolean;
-  mouth?: "neutral" | "smile" | "smirk" | "surprised" | "concerned";
-  hat?: boolean;
-  suitColor?: string;
-} = {}) {
-  const { headTilt = 0, blink = false, mouth = "neutral", hat = false, suitColor = "#1a1a2e" } = opts;
-  
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  ctx.fillStyle = suitColor;
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(-30, 10);
-  ctx.lineTo(-30, 80);
-  ctx.quadraticCurveTo(-30, 95, -15, 95);
-  ctx.lineTo(15, 95);
-  ctx.quadraticCurveTo(30, 95, 30, 80);
-  ctx.lineTo(30, 10);
-  ctx.quadraticCurveTo(30, -5, 15, -5);
-  ctx.lineTo(-15, -5);
-  ctx.quadraticCurveTo(-30, -5, -30, 10);
-  ctx.fill();
-  ctx.stroke();
-  
-  ctx.fillStyle = "#0a0a1a";
-  ctx.beginPath();
-  ctx.moveTo(-5, -5);
-  ctx.lineTo(-20, 30);
-  ctx.lineTo(-5, 30);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(5, -5);
-  ctx.lineTo(20, 30);
-  ctx.lineTo(5, 30);
-  ctx.fill();
-  
-  ctx.fillStyle = COLORS.gold;
-  ctx.beginPath();
-  ctx.moveTo(0, 5);
-  ctx.lineTo(-8, 35);
-  ctx.lineTo(8, 35);
-  ctx.fill();
-  ctx.stroke();
-  
-  const headY = -50;
-  ctx.save();
-  ctx.translate(0, headY);
-  ctx.rotate(headTilt);
-  
-  ctx.fillStyle = "rgba(0,0,0,0.4)";
-  ctx.beginPath();
-  ctx.ellipse(8, 8, 42, 38, 0, 0, TAU);
-  ctx.fill();
-  
-  ctx.fillStyle = "#e8d5b7";
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 40, 36, 0, 0, TAU);
-  ctx.fill();
-  ctx.stroke();
-  
-  if (hat) {
-    ctx.fillStyle = "#0a0a1a";
-    ctx.beginPath();
-    ctx.moveTo(-50, -20);
-    ctx.lineTo(50, -20);
-    ctx.lineTo(40, -45);
-    ctx.lineTo(-40, -45);
-    ctx.fill();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.ellipse(0, -20, 55, 8, 0, 0, TAU);
-    ctx.fill();
-    ctx.stroke();
-  }
-  
-  if (!blink) {
-    ctx.fillStyle = "#000000";
-    ctx.beginPath();
-    ctx.ellipse(-14, -4, 6, 8, 0, 0, TAU);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(14, -4, 6, 8, 0, 0, TAU);
-    ctx.fill();
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(-16, -6, 2, 0, TAU);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(12, -6, 2, 0, TAU);
-    ctx.fill();
-  } else {
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(-20, -4);
-    ctx.lineTo(-8, -4);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(8, -4);
-    ctx.lineTo(20, -4);
-    ctx.stroke();
-  }
-  
-  ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 3;
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(-22, -16);
-  ctx.lineTo(-6, -18);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(6, -18);
-  ctx.lineTo(22, -16);
-  ctx.stroke();
-  
-  ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 3;
-  ctx.lineCap = "round";
-  if (mouth === "smile") {
-    ctx.beginPath();
-    ctx.moveTo(-12, 14);
-    ctx.quadraticCurveTo(0, 22, 12, 14);
-    ctx.stroke();
-  } else if (mouth === "smirk") {
-    ctx.beginPath();
-    ctx.moveTo(-10, 16);
-    ctx.quadraticCurveTo(5, 12, 12, 16);
-    ctx.stroke();
-  } else if (mouth === "surprised") {
-    ctx.fillStyle = "#000000";
-    ctx.beginPath();
-    ctx.arc(0, 18, 6, 0, TAU);
-    ctx.fill();
-  } else if (mouth === "concerned") {
-    ctx.beginPath();
-    ctx.moveTo(-10, 18);
-    ctx.quadraticCurveTo(0, 14, 10, 18);
-    ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.moveTo(-8, 16);
-    ctx.lineTo(8, 16);
-    ctx.stroke();
-  }
-  
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
-  ctx.beginPath();
-  ctx.moveTo(0, -36);
-  ctx.quadraticCurveTo(20, -10, 20, 36);
-  ctx.quadraticCurveTo(0, 20, -20, 36);
-  ctx.quadraticCurveTo(-20, -10, 0, -36);
-  ctx.fill();
-  
-  ctx.restore();
-  ctx.restore();
-}
-
-function drawEiffelTower(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, glow: number = 0) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 2;
-  
-  ctx.beginPath();
-  ctx.moveTo(-60, 0);
-  ctx.lineTo(-15, -180);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(60, 0);
-  ctx.lineTo(15, -180);
-  ctx.stroke();
-  
-  for (let i = 0; i < 6; i++) {
-    const py = -20 - i * 28;
-    const w = 55 - i * 7;
-    ctx.beginPath();
-    ctx.moveTo(-w, py);
-    ctx.lineTo(w, py);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(-w, py);
-    ctx.lineTo(0, py - 14);
-    ctx.lineTo(w, py);
-    ctx.stroke();
-  }
-  
-  ctx.fillStyle = "#2a2a3a";
-  ctx.beginPath();
-  ctx.moveTo(-20, -200);
-  ctx.lineTo(20, -200);
-  ctx.lineTo(15, -210);
-  ctx.lineTo(-15, -210);
-  ctx.fill();
-  ctx.stroke();
-  
-  ctx.beginPath();
-  ctx.moveTo(0, -210);
-  ctx.lineTo(0, -250);
-  ctx.stroke();
-  
-  if (glow > 0) {
-    ctx.fillStyle = `rgba(255, 187, 0, ${glow * 0.6})`;
-    for (let i = 0; i < 5; i++) {
-      const py = -40 - i * 30;
-      const w = 50 - i * 6;
-      ctx.fillRect(-w, py - 5, w * 2, 8);
-    }
-    ctx.fillRect(-15, -205, 30, 10);
-  }
-  
-  ctx.restore();
-}
-
-function drawNewspaper(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, progress: number) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  const openProg = clamp(progress * 2, 0, 1);
-  const w = 160 * openProg;
-  
-  ctx.fillStyle = "rgba(0,0,0,0.4)";
-  ctx.fillRect(4, 4, w, 200);
-  
-  ctx.fillStyle = "#f5f0e1";
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 2;
-  ctx.fillRect(0, 0, w, 200);
-  ctx.strokeRect(0, 0, w, 200);
-  
-  if (openProg > 0.3) {
-    ctx.fillStyle = "#000000";
-    ctx.font = "bold 18px serif";
-    ctx.textAlign = "center";
-    ctx.fillText("MENARA EIFFEL", w/2, 50);
-    ctx.fillText("BERKARAT", w/2, 75);
-    ctx.font = "14px serif";
-    ctx.fillText("Biaya Perbaikan Mencapai Rekor", w/2, 105);
-    
-    ctx.strokeStyle = "#ccc";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 8; i++) {
-      ctx.beginPath();
-      ctx.moveTo(15, 130 + i * 18);
-      ctx.lineTo(w - 15, 130 + i * 18);
-      ctx.stroke();
-    }
-  }
-  
-  ctx.restore();
-}
-
-function drawHotelScene(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, dealers: number, highlightDealer: number = -1) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  const grad = ctx.createLinearGradient(0, 0, 0, 200);
-  grad.addColorStop(0, "#0a0a1a");
-  grad.addColorStop(1, "#1a1a2e");
-  ctx.fillStyle = grad;
-  ctx.fillRect(-200, -100, 400, 300);
-  
-  const chandGrad = ctx.createRadialGradient(0, -80, 0, 0, -80, 120);
-  chandGrad.addColorStop(0, "rgba(255,220,150,0.3)");
-  chandGrad.addColorStop(1, "rgba(255,187,0,0)");
-  ctx.fillStyle = chandGrad;
-  ctx.beginPath();
-  ctx.arc(0, -80, 120, 0, TAU);
-  ctx.fill();
-  
-  ctx.fillStyle = "#1a1a2e";
-  ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 2;
-  ctx.fillRect(-150, 40, 300, 60);
-  ctx.strokeRect(-150, 40, 300, 60);
-  
-  ctx.fillStyle = "#f5f0e1";
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 1;
-  ctx.fillRect(-40, 50, 80, 40);
-  ctx.strokeRect(-40, 50, 80, 40);
-  ctx.fillStyle = "#000";
-  ctx.font = "bold 10px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("RAHASIA", 0, 72);
-  ctx.fillText("PENJUALAN", 0, 84);
-  ctx.fillText("EIFFEL", 0, 96);
-  
-  for (let i = 0; i < dealers; i++) {
-    const dx = -100 + i * 40;
-    const isHighlight = i === highlightDealer;
-    drawCharacter(ctx, dx, 10, 0.35, {
-      suitColor: isHighlight ? "#2a2a4a" : "#1a1a2e",
-      mouth: isHighlight ? "concerned" : "neutral",
-      blink: false,
-    });
-  }
-  
-  drawCharacter(ctx, 0, 5, 0.4, {
-    hat: true,
-    suitColor: "#0a0a1a",
-    mouth: "smirk",
-    headTilt: -0.05,
-  });
-  
-  ctx.restore();
-}
-
-function drawBriefcase(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, open: number, moneyFloat: number) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  ctx.fillStyle = "#1a1a2e";
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 3;
-  ctx.fillRect(-60, -40, 120, 80);
-  ctx.strokeRect(-60, -40, 120, 80);
-  
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(-20, -40);
-  ctx.quadraticCurveTo(0, -60, 20, -40);
-  ctx.stroke();
-  
-  ctx.fillStyle = COLORS.gold;
-  ctx.fillRect(-5, -45, 10, 10);
-  
-  if (open > 0) {
-    ctx.save();
-    ctx.translate(0, -40);
-    ctx.rotate(-open * 1.2);
-    ctx.fillStyle = "#1a1a2e";
-    ctx.fillRect(-60, -40, 120, 20);
-    ctx.strokeRect(-60, -40, 120, 20);
-    ctx.restore();
-    
-    for (let i = 0; i < 12; i++) {
-      const angle = (i / 12) * TAU + moneyFloat * 2;
-      const radius = 50 + Math.sin(moneyFloat * 3 + i) * 20;
-      const mx = Math.cos(angle) * radius;
-      const my = Math.sin(angle) * radius * 0.5 - 20;
-      
-      ctx.fillStyle = "#33cc77";
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 1;
-      ctx.fillRect(mx - 12, my - 6, 24, 12);
-      ctx.strokeRect(mx - 12, my - 6, 24, 12);
-      ctx.fillStyle = "#000";
-      ctx.font = "8px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("100", mx, my + 3);
-    }
-  }
-  
-  ctx.restore();
-}
-
-function drawPoliceStation(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, poissonLeaves: number) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  ctx.fillStyle = "#1a1a2e";
-  ctx.strokeStyle = COLORS.outline;
-  ctx.lineWidth = 2;
-  ctx.fillRect(-120, -150, 240, 250);
-  ctx.strokeRect(-120, -150, 240, 250);
-  
-  ctx.fillStyle = "#0a0a1a";
-  ctx.fillRect(-80, -170, 160, 40);
-  ctx.strokeRect(-80, -170, 160, 40);
-  ctx.fillStyle = COLORS.white;
-  ctx.font = "bold 16px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("POLISI", 0, -142);
-  
-  const px = lerp(0, 200, poissonLeaves);
-  drawCharacter(ctx, px, -20, 0.4, {
-    suitColor: "#2a2a3e",
-    mouth: "concerned",
-    headTilt: poissonLeaves > 0.5 ? 0.1 : 0,
-  });
-  
-  if (poissonLeaves < 0.7) {
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    ctx.strokeStyle = COLORS.outline;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(px + 60, -80);
-    ctx.lineTo(px + 140, -80);
-    ctx.lineTo(px + 140, -140);
-    ctx.lineTo(px + 60, -140);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    
-    ctx.fillStyle = "#000";
-    ctx.font = "12px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("Malu...", px + 70, -115);
-    ctx.fillText("Tidak lapor.", px + 70, -95);
-  }
-  
-  ctx.restore();
-}
-
-function drawShip(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, progress: number) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  const waveGrad = ctx.createLinearGradient(0, 0, 0, 100);
-  waveGrad.addColorStop(0, "#0a1a2e");
-  waveGrad.addColorStop(1, "#050a15");
-  ctx.fillStyle = waveGrad;
-  ctx.fillRect(-300, -50, 600, 200);
-  
-  ctx.strokeStyle = "rgba(255,255,255,0.1)";
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 5; i++) {
-    ctx.beginPath();
-    for (let x = -300; x < 300; x += 10) {
-      const wy = Math.sin(x * 0.02 + progress * 5 + i) * 8 + i * 25;
-      if (x === -300) ctx.moveTo(x, wy);
-      else ctx.lineTo(x, wy);
-    }
-    ctx.stroke();
-  }
-  
-  const shipX = lerp(-200, 200, progress);
-  ctx.translate(shipX, 30);
-  
-  ctx.fillStyle = "#0a0a1a";
-  ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(-100, 0);
-  ctx.lineTo(-120, 40);
-  ctx.lineTo(120, 40);
-  ctx.lineTo(100, 0);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  
-  ctx.fillStyle = "#1a1a2e";
-  ctx.fillRect(-90, -30, 180, 30);
-  ctx.strokeRect(-90, -30, 180, 30);
-  
-  ctx.fillRect(-40, -70, 80, 40);
-  ctx.strokeRect(-40, -70, 80, 40);
-  
-  ctx.fillStyle = "rgba(255,187,0,0.4)";
-  for (let i = 0; i < 4; i++) {
-    ctx.fillRect(-35 + i * 20, -65, 12, 15);
-    ctx.strokeRect(-35 + i * 20, -65, 12, 15);
-  }
-  
-  ctx.fillStyle = "#0a0a1a";
-  ctx.fillRect(-10, -110, 20, 40);
-  ctx.strokeRect(-10, -110, 20, 40);
-  
-  for (let i = 0; i < 4; i++) {
-    const sy = -115 - i * 15 - progress * 30;
-    ctx.fillStyle = `rgba(150,150,150,${0.3 - i * 0.07})`;
-    ctx.beginPath();
-    ctx.arc(0 + Math.sin(progress * 8 + i) * 8, sy, 10 + i * 2, 0, TAU);
-    ctx.fill();
-  }
-  
-  drawBriefcase(ctx, -30, -40, 0.4, 0, 0);
-  drawBriefcase(ctx, 30, -40, 0.4, 0, 0);
-  
-  ctx.strokeStyle = "rgba(255,255,255,0.15)";
-  ctx.lineWidth = 2;
-  for (let i = 0; i < 10; i++) {
-    const wx = 100 + i * 15;
-    const wy = 30 + Math.sin(progress * 10 + i) * 5;
-    ctx.beginPath();
-    ctx.moveTo(wx, wy - 10);
-    ctx.quadraticCurveTo(wx + 7, wy, wx + 15, wy - 10);
-    ctx.stroke();
-  }
-  
-  ctx.restore();
-}
-
-function drawEiffelNight(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, glowPulse: number) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(scale, scale);
-  
-  const skyGrad = ctx.createLinearGradient(0, -300, 0, 100);
-  skyGrad.addColorStop(0, "#050515");
-  skyGrad.addColorStop(0.5, "#0a0a2a");
-  skyGrad.addColorStop(1, "#1a1a2e");
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(-200, -300, 400, 400);
-  
-  ctx.fillStyle = "#fff";
-  for (let i = 0; i < 50; i++) {
-    const sx = (rng() - 0.5) * 400;
-    const sy = (rng() - 0.5) * 300 - 150;
-    const sr = rng() * 1.5 + 0.5;
-    const alpha = 0.3 + 0.7 * Math.sin(glowPulse * 3 + i);
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, TAU);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-  
-  drawEiffelTower(ctx, 0, 50, 1.2, 0.5 + 0.5 * Math.sin(glowPulse * 2));
-  
-  ctx.fillStyle = "#0a0a1a";
-  ctx.fillRect(-200, 100, 400, 50);
-  
-  ctx.fillStyle = COLORS.text;
-  ctx.font = "bold 18px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("MENARA EIFFEL MASIH BERDIRI", 0, 140);
-  ctx.font = "14px sans-serif";
-  ctx.fillStyle = COLORS.textDim;
-  ctx.fillText("Belum pernah dijual... secara resmi", 0, 165);
-  
-  ctx.restore();
-}
-
-function drawCaption(ctx: CanvasRenderingContext2D, w: number, h: number, text: string, progress: number, yPos: number = 0.85) {
-  if (!text) return;
-  
-  const alpha = clamp(progress * 3, 0, 1) * clamp((1 - progress) * 3, 0, 1) * 1;
-  if (alpha <= 0) return;
-  
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  
-  const lines = text.split("\n");
-  const lineHeight = 40;
-  const totalHeight = lines.length * lineHeight;
-  const startY = h * yPos - totalHeight / 2;
-  
-  ctx.font = "bold 32px sans-serif";
-  ctx.textAlign = "center";
-  
-  for (let i = 0; i < lines.length; i++) {
-    const y = startY + i * lineHeight;
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 6;
-    ctx.lineJoin = "round";
-    ctx.strokeText(lines[i], w / 2, y);
-    ctx.fillStyle = COLORS.gold;
-    ctx.fillText(lines[i], w / 2, y);
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    ctx.fillText(lines[i], w / 2, y - 2);
-  }
-  
-  ctx.restore();
-}
-
-// Scene draw functions - each receives local progress 0-1 within its scene
-function drawScene1(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  drawNewspaper(ctx, w/2, h/2 - 100, 1.2, clamp(p, 0, 1));
-  drawCaption(ctx, w, h, "MENARA EIFFEL BERKARAT", clamp(p * 20, 0, 1));
-}
-
-function drawScene2(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  const blink = Math.floor(p * FPS * 60) % 60 < 3;
-  drawCharacter(ctx, w/2, h/2 + 50, 0.8 * easeOutBack(charProg), {
-    hat: true,
-    suitColor: "#0a0a1a",
-    mouth: "smirk",
-    blink,
-    headTilt: Math.sin(p * 2) * 0.05,
-  });
-  drawNewspaper(ctx, w/2 - 20, h/2 + 180, 0.6, 1);
-  drawCaption(ctx, w, h, "VICTOR LUSTIG:\nPENALIP PALING BRILIAN", clamp(p * 20, 0, 1));
-}
-
-function drawScene3(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6);
-  drawCaption(ctx, w, h, "HOTEL MEWAH \u2022 6 DEALER BESI", clamp(p * 20, 0, 1));
-}
-
-function drawScene4(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, 2);
-  const docScale = 1 + 0.5 * easeOut(charProg);
-  ctx.save();
-  ctx.translate(w/2, h/2 + 100);
-  ctx.scale(docScale, docScale);
-  ctx.translate(-w/2, -h/2);
-  drawHotelScene(ctx, w/2, h/2 + 20, 1, 6, 2);
-  ctx.restore();
-  drawCaption(ctx, w, h, "7.000 TON BESI \u2022 RAHASIA", clamp(p * 20, 0, 1));
-}
-
-function drawScene5(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, 2);
-  drawCharacter(ctx, w/2 - 20, h/2 - 20, 0.6, {
-    suitColor: "#2a2a3e",
-    mouth: "concerned",
-    blink: Math.floor(p * FPS * 60) % 40 < 2,
-  });
-  drawCaption(ctx, w, h, "POISSON: DEALER BARU,\nAMBISIUS TAPI RAGU", clamp(p * 20, 0, 1));
-}
-
-function drawScene6(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, 2);
-  drawCharacter(ctx, w/2 + 10, h/2 - 10, 0.5, {
-    hat: true,
-    suitColor: "#0a0a1a",
-    mouth: "smirk",
-    headTilt: 0.15,
-  });
-  ctx.strokeStyle = "rgba(255,255,255,0.3)";
-  ctx.lineWidth = 1;
-  ctx.lineCap = "round";
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath();
-    ctx.moveTo(w/2 + 40, h/2 - 30 + i * 8);
-    ctx.lineTo(w/2 + 70, h/2 - 25 + i * 8);
-    ctx.stroke();
-  }
-  drawCaption(ctx, w, h, "SUAP = BUKTI KEASLIAN", clamp(p * 20, 0, 1));
-}
-
-function drawScene7(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  const moneyFloat = p * 2;
-  drawHotelScene(ctx, w/2, h/2 + 20, 1, 6, 2);
-  drawBriefcase(ctx, w/2, h/2 + 120, 0.8, charProg, moneyFloat);
-  drawCaption(ctx, w, h, "KOPER PENUH UANG \u2022 KE VIENNA", clamp(p * 20, 0, 1));
-}
-
-function drawScene8(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawPoliceStation(ctx, w/2, h/2 + 50, 1, charProg);
-  drawCaption(ctx, w, h, "TIDAK LAPOR \u2022 MALU", clamp(p * 20, 0, 1));
-}
-
-function drawScene9(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawHotelScene(ctx, w/2, h/2 + 20, charProg, 6, -1);
-  if (charProg > 0.3) {
-    ctx.save();
-    ctx.translate(w/2, h/2 - 150);
-    ctx.rotate(-0.15);
-    ctx.fillStyle = "rgba(204,51,51,0.9)";
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 3;
-    drawRoundedRect(ctx, -120, -30, 240, 60, 10);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 24px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("1 BULAN KEMUDIAN", 0, 8);
-    ctx.font = "16px sans-serif";
-    ctx.fillText("DEALER BARU", 0, 32);
-    ctx.restore();
-  }
-  drawCaption(ctx, w, h, "1 BULAN KEMUDIAN \u2022 DEALER BARU", clamp(p * 20, 0, 1));
-}
-
-function drawScene10(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  const speed = 1 + charProg;
-  drawHotelScene(ctx, w/2, h/2 + 20, 1, 6);
-  ctx.strokeStyle = "rgba(255,187,0,0.6)";
-  ctx.lineWidth = 2;
-  for (let i = 0; i < 10; i++) {
-    const x = -150 + i * 30;
-    const offset = (p * speed * 100 + i * 10) % 400 - 200;
-    ctx.beginPath();
-    ctx.moveTo(x + offset, h/2 - 50);
-    ctx.lineTo(x + offset + 50, h/2 - 50);
-    ctx.stroke();
-  }
-  ctx.fillStyle = "rgba(0,0,0,0.8)";
-  ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 2;
-  drawRoundedRect(ctx, w/2 - 60, 40, 120, 40, 8);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = COLORS.gold;
-  ctx.font = "bold 20px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText("2x LEBIH CEPAT", w/2, 68);
-  drawCaption(ctx, w, h, "2x LEBIH CEPAT \u2022 UANG LAGI", clamp(p * 20, 0, 1));
-}
-
-function drawScene11(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  const splitX = w/2 + lerp(0, w/2, charProg);
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, 0, splitX, h);
-  ctx.clip();
-  drawHotelScene(ctx, w/4, h/2 + 20, 1, 1, 0);
-  ctx.restore();
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(splitX, 0, w - splitX, h);
-  ctx.clip();
-  drawPoliceStation(ctx, (w + splitX)/2, h/2 + 50, 1, charProg);
-  ctx.restore();
-  ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 3;
-  ctx.setLineDash([10, 10]);
-  ctx.beginPath();
-  ctx.moveTo(splitX, 0);
-  ctx.lineTo(splitX, h);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  drawCaption(ctx, w, h, "KALI INI: LAPOR KE POLISI", clamp(p * 20, 0, 1));
-}
-
-function drawScene12(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const charProg = clamp(p, 0, 1);
-  drawShip(ctx, w/2, h/2 + 100, 1, charProg);
-  drawCaption(ctx, w, h, "MARK SELANJUTNYA: AL CAPONE", clamp(p * 20, 0, 1));
-}
-
-function drawScene13(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  const glowPulse = p * 0.5;
-  drawEiffelNight(ctx, w/2, h/2, 1, glowPulse);
-  drawCaption(ctx, w, h, "MENARA EIFFEL MASIH BERDIRI", clamp(p * 20, 0, 1));
-}
-
-function drawScene14(ctx: CanvasRenderingContext2D, w: number, h: number, p: number) {
-  ctx.fillStyle = COLORS.bg;
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = "rgba(255,255,255,0.05)";
-  drawRoundedRect(ctx, w/2 - 150, h/2 - 150, 300, 300, 20);
-  ctx.fill();
-  ctx.fillStyle = COLORS.gold;
-  ctx.font = "bold 48px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("\u{1F4B0}", w/2, h/2 - 50);
-  ctx.font = "bold 24px sans-serif";
-  ctx.fillStyle = COLORS.text;
-  ctx.fillText("FOLLOW UNTUK", w/2, h/2 + 20);
-  ctx.fillText("CERITA UANG LAINNYA", w/2, h/2 + 55);
-  ctx.font = "18px sans-serif";
-  ctx.fillStyle = COLORS.textDim;
-  ctx.fillText("@wealthstock.id", w/2, h/2 + 120);
-}
-
-// Main draw function - routes to correct scene based on global progress
-export function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, progress: number, frame: number) {
-  ctx.fillStyle = COLORS.bg;
-  ctx.fillRect(0, 0, w, h);
-  
-  if (progress < 3/60) {
-    drawScene1(ctx, w, h, progress * 60 / 3);
-  } else if (progress < 6/60) {
-    drawScene2(ctx, w, h, (progress - 3/60) * 60 / 3);
-  } else if (progress < 10/60) {
-    drawScene3(ctx, w, h, (progress - 6/60) * 60 / 4);
-  } else if (progress < 13/60) {
-    drawScene4(ctx, w, h, (progress - 10/60) * 60 / 3);
-  } else if (progress < 17/60) {
-    drawScene5(ctx, w, h, (progress - 13/60) * 60 / 4);
-  } else if (progress < 21/60) {
-    drawScene6(ctx, w, h, (progress - 17/60) * 60 / 4);
-  } else if (progress < 24/60) {
-    drawScene7(ctx, w, h, (progress - 21/60) * 60 / 3);
-  } else if (progress < 27/60) {
-    drawScene8(ctx, w, h, (progress - 24/60) * 60 / 3);
-  } else if (progress < 30/60) {
-    drawScene9(ctx, w, h, (progress - 27/60) * 60 / 3);
-  } else if (progress < 34/60) {
-    drawScene10(ctx, w, h, (progress - 30/60) * 60 / 4);
-  } else if (progress < 37/60) {
-    drawScene11(ctx, w, h, (progress - 34/60) * 60 / 3);
-  } else if (progress < 40/60) {
-    drawScene12(ctx, w, h, (progress - 37/60) * 60 / 3);
-  } else if (progress < 43/60) {
-    drawScene13(ctx, w, h, (progress - 40/60) * 60 / 3);
-  } else {
-    drawScene14(ctx, w, h, (progress - 43/60) * 60 / 17);
-  }
-}
-
-const MoneyStoryCanvas = ({ frame, progress }: { frame: number; progress: number }) => {
   return (
-    <HtmlInCanvas
-      width={720}
-      height={1280}
-      onPaint={(params: any) => {
-        const canvas = params.canvas || params;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        drawFrame(ctx, 720, 1280, progress, frame);
+    <AbsoluteFill
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        opacity,
       }}
     >
-      <div />
-    </HtmlInCanvas>
+      <div
+        style={{
+          width: "90%",
+          maxWidth: 720 * 0.9,
+          aspectRatio: "720/1024",
+          transform: `scale(${scale})`,
+          transformOrigin: "center center",
+          backgroundColor: "#f5f0e1",
+          border: "4px solid #000000",
+          borderRadius: "8px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(0,0,0,0.1)",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        {/* Newspaper masthead */}
+        <div
+          style={{
+            position: "absolute",
+            top: "2%",
+            left: "4%",
+            right: "4%",
+            textAlign: "center",
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Playfair Display",
+              fontSize: "48px",
+              fontWeight: "bold",
+              lineHeight: 1.1,
+              color: "#000000",
+              textShadow: "2px 2px 0px rgba(255,255,255,0.3)",
+            }}
+          >
+            LE MATIN
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Playfair Display",
+              fontSize: "18px",
+              fontWeight: "normal",
+              lineHeight: 1.2,
+              color: "#333333",
+              marginTop: "4px",
+            }}
+          >
+            PARIS, 1925 • EDITION DU MATIN
+          </Text>
+        </div>
+
+        {/* Main headline - "MENARA EIFFEL DIJUAL" */}
+        <div
+          style={{
+            position: "absolute",
+            top: "18%",
+            left: "6%",
+            right: "6%",
+            textAlign: "center",
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Anton",
+              fontSize: "52px",
+              fontWeight: "400",
+              lineHeight: 1.05,
+              color: "#000000",
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+            }}
+          >
+            MENARA EIFFEL
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Anton",
+              fontSize: "52px",
+              fontWeight: "400",
+              lineHeight: 1.05,
+              color: "#cc0000",
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              marginTop: "4px",
+            }}
+          >
+            DIJUAL
+          </Text>
+        </div>
+
+        {/* Sub-headline */}
+        <div
+          style={{
+            position: "absolute",
+            top: "36%",
+            left: "6%",
+            right: "6%",
+            textAlign: "center",
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Playfair Display",
+              fontSize: "22px",
+              fontWeight: "bold",
+              lineHeight: 1.3,
+              color: "#000000",
+            }}
+          >
+            Kontrak Rahasia Pemerintah Prancis
+          </Text>
+        </div>
+
+        {/* Key detail: "Biaya Perbaikan: 250 Juta Franc" - MUST be 40px+ from all edges */}
+        <div
+          style={{
+            position: "absolute",
+            top: "48%",
+            left: "8%",
+            right: "8%",
+            textAlign: "center",
+            zIndex: 10,
+            padding: "16px",
+            backgroundColor: "rgba(255,255,255,0.9)",
+            border: "2px solid #000000",
+            borderRadius: "6px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Oswald",
+              fontSize: "28px",
+              fontWeight: "700",
+              lineHeight: 1.2,
+              color: "#000000",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            Biaya Perbaikan: 250 Juta Franc
+          </Text>
+        </div>
+
+        {/* Body text lines */}
+        <div
+          style={{
+            position: "absolute",
+            top: "62%",
+            left: "6%",
+            right: "6%",
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Noto Serif",
+              fontSize: "16px",
+              lineHeight: 1.6,
+              color: "#1a1a1a",
+              textAlign: "justify",
+            }}
+          >
+            La Tour Eiffel, symbole de la grandeur française, nécessite des
+            réparations urgentes. La rouille menace la structure de 7 300 tonnes.
+            Le gouvernement cherche un acheteur pour la démolition.
+          </Text>
+        </div>
+
+        <div
+          style={{
+            position: "absolute",
+            top: "74%",
+            left: "6%",
+            right: "6%",
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Noto Serif",
+              fontSize: "16px",
+              lineHeight: 1.6,
+              color: "#1a1a1a",
+              textAlign: "justify",
+            }}
+          >
+            M. Lustig, homme d'affaires avisé, voit une opportunité unique.
+            Six marchands de fer déjà contactés pour soumission confidentielle.
+          </Text>
+        </div>
+
+        {/* Decorative line */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "12%",
+            left: "20%",
+            right: "20%",
+            height: "2px",
+            background: "linear-gradient(90deg, transparent, #000, transparent)",
+            zIndex: 5,
+          }}
+        />
+
+        {/* Bottom section */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "6%",
+            left: "6%",
+            right: "6%",
+            textAlign: "center",
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Playfair Display",
+              fontSize: "14px",
+              lineHeight: 1.4,
+              color: "#333333",
+            }}
+          >
+            Prix: 25 centimes • 8 Pages • Dépôt Légal
+          </Text>
+        </div>
+
+        {/* Paper texture overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 720 1024' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E")`,
+            pointerEvents: "none",
+            zIndex: 20,
+          }}
+        />
+      </div>
+    </AbsoluteFill>
   );
 };
 
-export const MoneyStoryShorts = () => {
+// Paris street ground layer with props
+const StreetGround = ({ progress }: { progress: number }) => {
+  const yOffset = interpolate(progress * SCENE_1_DURATION, [0, SCENE_1_DURATION], [100, 0]);
+
+  return (
+    <AbsoluteFill
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-end",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          height: "28%",
+          minHeight: "360px",
+          background: "linear-gradient(180deg, transparent 0%, #1a1a2e 40%, #0a0a1a 100%)",
+          position: "relative",
+          transform: `translateY(${yOffset}px)`,
+          overflow: "visible",
+        }}
+      >
+        {/* Cobblestone texture */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 720 360' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h720v360H0z' fill='%231a1a2e'/%3E%3Cpath d='M20 20a20 20 0 0140 0h640a20 20 0 010 40H60a20 20 0 010-40z' fill='%23252540' fill-opacity='0.3'/%3E%3C/svg%3E")`,
+            backgroundSize: "120px 80px",
+            opacity: 0.6,
+          }}
+        />
+
+        {/* Prop 1: Cafe table & chairs */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "5%",
+            left: "8%",
+            width: "140px",
+            height: "100px",
+            background: "linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%)",
+            border: "2px solid #333",
+            borderRadius: "8px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "-8px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "16px",
+              height: "16px",
+              background: "#ffd700",
+              border: "2px solid #000",
+              borderRadius: "50%",
+              boxShadow: "0 0 8px #ffd700",
+            }}
+          />
+        </div>
+
+        {/* Prop 2: Street lamp */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "5%",
+            right: "10%",
+            width: "12px",
+            height: "180px",
+            background: "linear-gradient(180deg, #1a1a2e 0%, #0a0a1a 100%)",
+            borderLeft: "2px solid #333",
+            borderRight: "2px solid #333",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: "-24px",
+              left: "-16px",
+              width: "44px",
+              height: "28px",
+              background: "#1a1a2e",
+              border: "2px solid #333",
+              borderRadius: "8px 8px 0 0",
+              boxShadow: "inset 0 0 20px rgba(255,215,0,0.3)",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "16px",
+                height: "16px",
+                background: "radial-gradient(circle at 30% 30%, #fff8dc 0%, #ffd700 50%, #ccac00 100%)",
+                borderRadius: "50%",
+                boxShadow: "0 0 12px #ffd700, inset 0 0 4px rgba(255,255,255,0.5)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Prop 3: Bakery awning */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "35%",
+            left: "55%",
+            width: "180px",
+            height: "60px",
+            background: "linear-gradient(180deg, #cc3333 0%, #990000 100%)",
+            borderRadius: "0 0 12px 12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Playfair Display",
+              fontSize: "18px",
+              fontWeight: "bold",
+              color: "#fff",
+              textAlign: "center",
+              marginTop: "16px",
+              textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
+            }}
+          >
+            BOULANGERIE
+          </Text>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// Sky background - full bleed layer 0
+const SkyBackground = () => (
+  <AbsoluteFill
+    style={{
+      background: "linear-gradient(180deg, #4a90d9 0%, #87ceeb 35%, #e0f0ff 70%, #f5f0e1 100%)",
+    }}
+  >
+    {/* Subtle cloud shapes */}
+    <div
+      style={{
+        position: "absolute",
+        top: "8%",
+        left: "5%",
+        width: "200px",
+        height: "60px",
+        background: "rgba(255,255,255,0.4)",
+        borderRadius: "50%",
+        filter: "blur(20px)",
+        opacity: 0.6,
+      }}
+    />
+    <div
+      style={{
+        position: "absolute",
+        top: "12%",
+        right: "8%",
+        width: "160px",
+        height: "48px",
+        background: "rgba(255,255,255,0.3)",
+        borderRadius: "50%",
+        filter: "blur(16px)",
+        opacity: 0.5,
+      }}
+    />
+  </AbsoluteFill>
+);
+
+// Scene 1 Component
+export const Scene1 = () => {
+  const frame = useCurrentFrame();
+  const progress = frame / SCENE_1_DURATION;
+
+  return (
+    <>
+      <Sequence from={SCENE_1_START} durationInFrames={SCENE_1_DURATION}>
+        <SkyBackground />
+      </Sequence>
+      <Sequence from={SCENE_1_START} durationInFrames={SCENE_1_DURATION}>
+        <Newspaper progress={progress} />
+      </Sequence>
+      <Sequence from={SCENE_1_START} durationInFrames={SCENE_1_DURATION}>
+        <StreetGround progress={progress} />
+      </Sequence>
+    </>
+  );
+};
+
+// Main composition component
+export const MoneyStory = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   const progress = frame / durationInFrames;
-  return <MoneyStoryCanvas frame={frame} progress={progress} />;
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#0a0a1a" }}>
+      <Scene1 />
+      {/* Subtitle overlay - safe area: bottom 120px, padding 48px LR */}
+      {frame >= SCENE_1_START && frame <= SCENE_1_END && (
+        <AbsoluteFill
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            paddingBottom: "140px",
+            paddingLeft: "48px",
+            paddingRight: "48px",
+            pointerEvents: "none",
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "100%",
+              backgroundColor: "rgba(0,0,0,0.75)",
+              border: "2px solid #ffd700",
+              borderRadius: "12px",
+              padding: "16px 24px",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Oswald",
+                fontSize: "28px",
+                fontWeight: "700",
+                lineHeight: 1.2,
+                color: "#ffd700",
+                textAlign: "center",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                overflowWrap: "break-word",
+                maxWidth: "100%",
+              }}
+            >
+              MENARA EIFFEL BERKARAT • BIAYA PERBAIKAN 250 JUTA FRANC
+            </Text>
+          </div>
+        </AbsoluteFill>
+      )}
+    </AbsoluteFill>
+  );
 };
 
+// Composition registration
 export const MyComposition = () => {
   return (
     <Composition
-      id="MoneyStoryShorts"
-      component={MoneyStoryShorts}
+      id="MoneyStory"
+      component={MoneyStory}
       durationInFrames={1800}
       fps={30}
       width={720}
