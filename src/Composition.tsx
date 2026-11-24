@@ -37,27 +37,32 @@ interface SceneData {
   subtitle: string;
   heroElement: string;
   background: string;
-  characters: any[];
+  characters: unknown[];
   props: string[];
   notes: string;
+  startFrame: number;
+  endFrame: number;
+  durationFrames: number;
+  durationSeconds: number;
+  midFrame: number;
 }
 
 // Scene start/end frames from scenes.json
-const SCENES = [
-  { id: "scene-01", start: 0, end: 89, mid: 44 },
-  { id: "scene-02", start: 90, end: 179, mid: 134 },
-  { id: "scene-03", start: 180, end: 299, mid: 239 },
-  { id: "scene-04", start: 300, end: 389, mid: 344 },
-  { id: "scene-05", start: 390, end: 509, mid: 449 },
-  { id: "scene-06", start: 510, end: 629, mid: 569 },
-  { id: "scene-07", start: 630, end: 719, mid: 674 },
-  { id: "scene-08", start: 720, end: 809, mid: 764 },
-  { id: "scene-09", start: 810, end: 899, mid: 854 },
-  { id: "scene-10", start: 900, end: 1019, mid: 959 },
-  { id: "scene-11", start: 1020, end: 1109, mid: 1064 },
-  { id: "scene-12", start: 1110, end: 1199, mid: 1154 },
-  { id: "scene-13", start: 1200, end: 1289, mid: 1244 },
-  { id: "scene-14", start: 1290, end: 1799, mid: 1544 },
+const SCENES: SceneData[] = [
+  { id: "scene-01", name: "Judul Koran", narration: "Pagi 1925. Koran Paris berteriak: Menara Eiffel berkarat, biaya perbaikan melonjak.", subtitle: "MENARA EIFFEL BERKARAT • BIAYA PERBAIKAN MELONJAK", heroElement: "newspaper", background: "paris-morning-sky", characters: [], props: ["newspaper-large", "coffee-cup", "bakery-awning"], notes: "Full-bleed newspaper front page as hero, 60%+ frame height. Paris street level as ground layer with 2+ props.", startFrame: 0, endFrame: 89, durationFrames: 90, durationSeconds: 3, midFrame: 44 },
+  { id: "scene-02", name: "Victor Lustig", narration: "Victor Lustig, penalip paling brilian, membaca berita itu sambil tersenyum tipis.", subtitle: "VICTOR LUSTIG: PENALIP PALING BRILIAN", heroElement: "victor-character", background: "cafe-interior", characters: [], props: ["cafe-table", "chair", "coffee-cup", "folded-newspaper", "window-paris"], notes: "Victor at 45% frame height (~576px), centered. Cafe interior background with window showing Paris.", startFrame: 90, endFrame: 179, durationFrames: 90, durationSeconds: 3, midFrame: 134 },
+  { id: "scene-03", name: "Hotel Mewah - 6 Dealer", narration: "Hotel mewah Paris. Enam dealer besi bersemi di ruangan berluster, menunggu 'kontrak rahasia'.", subtitle: "HOTEL MEWAH • 6 DEALER BESI MENUNGGU KONTRAK RAHASIA", heroElement: "hotel-chandelier", background: "hotel-ballroom", characters: [], props: ["crystal-chandelier", "mahogany-table", "secret-document", "champagne-glasses", "velvet-curtains", "gold-mirror"], notes: "Large chandelier as hero (60%+ height). 6 dealers in 3-left/3-right formation, Victor center with hat. Ballroom floor + 4+ props.", startFrame: 180, endFrame: 299, durationFrames: 120, durationSeconds: 4, midFrame: 239 },
+  { id: "scene-04", name: "7000 Ton Besi - Rahasia", narration: "7.000 ton besi. Kontrak dijual sebagai rahasia negara. Dealer ke-2 tertarik, tangan mengangkat dokumen.", subtitle: "7.000 TON BESI • KONTRAK RAHASIA NEGARA", heroElement: "secret-document", background: "hotel-ballroom", characters: [], props: ["secret-document-large", "mahogany-table", "chandelier", "champagne-glasses", "velvet-curtains"], notes: "Document scaled up as hero element (60%+ height). Dealer-2 highlighted reaching for it. Victor center smirking.", startFrame: 300, endFrame: 389, durationFrames: 90, durationSeconds: 3, midFrame: 344 },
+  { id: "scene-05", name: "Poisson - Dealer Baru", narration: "Poisson, dealer baru, ambisius tapi ragu. Lustig membaca kelemahan itu seperti buku terbuka.", subtitle: "POISSON: DEALER BARU, AMBISIUS TAPI RAGU", heroElement: "poisson-character", background: "hotel-ballroom", characters: [], props: ["mahogany-table", "document-folder", "chandelier", "champagne-glass", "pocket-watch"], notes: "Two-character scene: Poisson left (concerned), Victor right (smirking with hat). Hotel props between them.", startFrame: 390, endFrame: 509, durationFrames: 120, durationSeconds: 4, midFrame: 449 },
+  { id: "scene-06", name: "Suap = Bukti Keaslian", narration: "Suap diberikan. Bukan korupsi — bukti keaslian kontrak. Tangan Lustig mengayunkan amplop ke Poisson.", subtitle: "SUAP = BUKTI KEASLIAN KONTRAK", heroElement: "envelope-bribe", background: "hotel-ballroom", characters: [], props: ["envelope-large", "mahogany-table", "chandelier", "champagne-glasses", "document-folder"], notes: "Large envelope as hero element passed from Victor to Poisson. Hotel ballroom background maintained.", startFrame: 510, endFrame: 629, durationFrames: 120, durationSeconds: 4, midFrame: 569 },
+  { id: "scene-07", name: "Koper Penuh Uang - Ke Vienna", narration: "Koper penuh uang. Lustig pergi ke Vienna, meninggalkan Paris dan 6 dealer yang tertipu.", subtitle: "KOPER PENUH UANG • BERANGKAT KE VIENNA", heroElement: "briefcase-money", background: "train-station", characters: [], props: ["briefcase-large-money", "steam-train", "platform-clock", "luggage-cart", "steam-clouds", "station-sign-vienna"], notes: "Open briefcase with money floating as hero (60%+ height). Train station background with steam train. Victor confident with hat.", startFrame: 630, endFrame: 719, durationFrames: 90, durationSeconds: 3, midFrame: 674 },
+  { id: "scene-08", name: "Polisi - Tidak Lapor Malu", narration: "Poisson di kantor polisi. Malu tertipu, ia memilih diam. 'Tidak lapor.' Lustig aman.", subtitle: "POISSON DI POLISI • MALU • TIDAK LAPOR", heroElement: "police-station-sign", background: "police-station", characters: [], props: ["police-desk", "police-sign-large", "filing-cabinet", "wanted-poster", "officer-silhouette", "door-exit"], notes: "Police station sign as hero. Poisson centered-left looking concerned with speech bubble 'Malu... Tidak lapor.' Officer silhouette in background.", startFrame: 720, endFrame: 809, durationFrames: 90, durationSeconds: 3, midFrame: 764 },
+  { id: "scene-09", name: "1 Bulan Kemudian - Dealer Baru", narration: "Satu bulan kemudian. Lustig kembali ke Paris. Dealer baru. Pola yang sama. Uang yang sama.", subtitle: "1 BULAN KEMUDIAN • DEALER BARU • POLA YANG SAMA", heroElement: "calendar-page", background: "hotel-ballroom", characters: [], props: ["calendar-page-flip", "mahogany-table", "chandelier", "document-folder", "champagne-glasses", "velvet-curtains"], notes: "Calendar page flipping as hero element showing '1 BULAN KEMUDIAN'. Victor center, new dealer left. Hotel ballroom reused.", startFrame: 810, endFrame: 899, durationFrames: 90, durationSeconds: 3, midFrame: 854 },
+  { id: "scene-10", name: "2x Lebih Cepat - Uang Lagi", narration: "Kali ini 2x lebih cepat. Suap lebih besar. Uang mengalir lebih deras. Lustig tidak henti.", subtitle: "2x LEBIH CEPAT • SUAP LEBIH BESAR • UANG BERTAMBAL", heroElement: "speed-lines-money", background: "hotel-ballroom", characters: [], props: ["money-flow-lines", "briefcase-stack", "timer-2x", "chandelier", "mahogany-table", "champagne-tower"], notes: "Speed lines with money as hero element (60%+ height). '2x' badge prominent. Victor center, dealer surprised. Faster pace visual.", startFrame: 900, endFrame: 1019, durationFrames: 120, durationSeconds: 4, midFrame: 959 },
+  { id: "scene-11", name: "Split: Hotel vs Polisi - Kali Ini Lapor", narration: "Dealer kali ini tidak diam. Hotel kiri, polisi kanan. Garis emas memisah. 'Lapor ke polisi!'", subtitle: "KALI INI: DEALER LAPOR KE POLISI", heroElement: "split-divider-gold", background: "split-hotel-police", characters: [], props: ["gold-divider-line", "hotel-panel-bg", "police-panel-bg", "document-evidence", "handcuffs", "gavel"], notes: "TRUE split-screen 50/50 with gold divider. Left: hotel ballroom with Victor concerned. Right: police station with dealer reporting. Both panels overflow:hidden with own padding.", startFrame: 1020, endFrame: 1109, durationFrames: 90, durationSeconds: 3, midFrame: 1064 },
+  { id: "scene-12", name: "Kapal ke Mark Selanjutnya: Al Capone", narration: "Lustig kabur ke Amerika. Kapal melintas Atlantik. Mark selanjutnya: Al Capone, raja Chicago.", subtitle: "KAPAL KE AMERIKA • MARK SELANJUTNYA: AL CAPONE", heroElement: "ocean-liner", background: "ocean-atlantik", characters: [], props: ["ocean-liner-large", "atlantic-waves", "seagulls", "horizon-sunset", "ship-railing", "steam-funnel"], notes: "Ocean liner as hero element (60%+ frame height). Victor on deck with briefcase. Atlantic waves + sunset horizon. Ship railing as foreground prop.", startFrame: 1110, endFrame: 1199, durationFrames: 90, durationSeconds: 3, midFrame: 1154 },
+  { id: "scene-13", name: "Menara Eiffel Malam - Masih Berdiri", narration: "Menara Eiffel masih berdiri megah di Paris. Belum pernah dijual — secara resmi.", subtitle: "MENARA EIFFEL MASIH BERDIRI • BELUM PERNAH DIJUAL SECARA RESMI", heroElement: "eiffel-tower-night", background: "paris-night-sky", characters: [], props: ["eiffel-tower-glowing", "seine-river-reflection", "paris-rooftops", "street-lamps", "stars-sparkle", "moon-glow"], notes: "Eiffel Tower at night as hero (80%+ frame height, glowing). Seine river reflection. Paris rooftops foreground. Stars + moon.", startFrame: 1200, endFrame: 1289, durationFrames: 90, durationSeconds: 3, midFrame: 1244 },
+  { id: "scene-14", name: "CTA - Follow Cerita Uang", narration: "Ikuti @wealthstock.id untuk cerita uang lain yang tak kalah gila. Follow untuk update.", subtitle: "FOLLOW UNTUK CERITA UANG LAINNYA", heroElement: "money-bag-icon", background: "gradient-dark-gold", characters: [], props: ["money-bag-large", "sparkle-particles", "follow-button", "handle-text", "coin-stack", "gold-glow"], notes: "Large money bag icon as hero (60%+ height). Dark gradient background with gold accents. CTA text centered in safe area. Handle @wealthstock.id prominent.", startFrame: 1290, endFrame: 1799, durationFrames: 510, durationSeconds: 17, midFrame: 1544 },
 ];
 
 // Cloud decorative overlay - using div with inline background (no img tags, no 'right' prop)
@@ -952,7 +957,7 @@ const Scene = ({
       )}
 
       {/* Layer 3: Subtitle in safe area (bottom 120px from frame bottom, padding 48px LR) */}
-      {frame >= scene.start && frame <= scene.end && (
+      {frame >= scene.startFrame && frame <= scene.endFrame && (
         <AbsoluteFill
           style={{
             display: "flex",
@@ -991,7 +996,7 @@ const Scene = ({
       )}
 
       {/* CTA only on last scene (scene 14) */}
-      {scene.id === "scene-14" && frame >= scene.start && frame <= scene.end && (
+      {sceneData.id === "scene-14" && frame >= sceneData.startFrame && frame <= sceneData.endFrame && (
         <AbsoluteFill
           style={{
             display: "flex",
@@ -1035,15 +1040,21 @@ const Scene = ({
 export const MoneyStory = () => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
-  const progress = frame / durationInFrames;
+
+  // Find active scene based on current frame
+  const activeScene = SCENES.find(
+    (scene) => frame >= scene.startFrame && frame <= scene.endFrame
+  ) || SCENES[0];
+
+  const sceneProgress = (frame - activeScene.startFrame) / activeScene.durationFrames;
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#0a0a1a" }}>
       <Scene
-        sceneId={SCENES[0].id}
-        progress={progress}
+        sceneId={activeScene.id}
+        progress={sceneProgress}
         frame={frame}
-        sceneData={SCENES[0]}
+        sceneData={activeScene}
       />
     </AbsoluteFill>
   );
