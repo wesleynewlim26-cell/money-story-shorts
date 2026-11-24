@@ -6,7 +6,6 @@ import {
   AbsoluteFill,
   Sequence,
 } from "remotion";
-import { GoogleFont, Text } from "@remotion/google-fonts";
 
 type Props = {};
 
@@ -36,6 +35,21 @@ const interpolate = (
   const clampedT = extrapolate === "clamp" ? Math.max(0, Math.min(1, t)) : t;
   return outMin + (outMax - outMin) * clampedT;
 };
+
+// Text component using plain div with fontFamily
+const StyledText = ({
+  children,
+  style,
+  className,
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  className?: string;
+}) => (
+  <div style={{ ...style, fontFamily: style?.fontFamily }} className={className}>
+    {children}
+  </div>
+);
 
 // Newspaper SVG component - fills 80%+ width, full-bleed
 const Newspaper = ({ progress }: { progress: number }) => {
@@ -77,9 +91,9 @@ const Newspaper = ({ progress }: { progress: number }) => {
             zIndex: 10,
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Playfair Display",
+              fontFamily: "Playfair Display, serif",
               fontSize: "48px",
               fontWeight: "bold",
               lineHeight: 1.1,
@@ -88,10 +102,10 @@ const Newspaper = ({ progress }: { progress: number }) => {
             }}
           >
             LE MATIN
-          </Text>
-          <Text
+          </StyledText>
+          <StyledText
             style={{
-              fontFamily: "Playfair Display",
+              fontFamily: "Playfair Display, serif",
               fontSize: "18px",
               fontWeight: "normal",
               lineHeight: 1.2,
@@ -100,7 +114,7 @@ const Newspaper = ({ progress }: { progress: number }) => {
             }}
           >
             PARIS, 1925 • EDITION DU MATIN
-          </Text>
+          </StyledText>
         </div>
 
         {/* Main headline - "MENARA EIFFEL DIJUAL" */}
@@ -114,9 +128,9 @@ const Newspaper = ({ progress }: { progress: number }) => {
             zIndex: 10,
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Anton",
+              fontFamily: "Anton, sans-serif",
               fontSize: "52px",
               fontWeight: "400",
               lineHeight: 1.05,
@@ -126,10 +140,10 @@ const Newspaper = ({ progress }: { progress: number }) => {
             }}
           >
             MENARA EIFFEL
-          </Text>
-          <Text
+          </StyledText>
+          <StyledText
             style={{
-              fontFamily: "Anton",
+              fontFamily: "Anton, sans-serif",
               fontSize: "52px",
               fontWeight: "400",
               lineHeight: 1.05,
@@ -140,7 +154,7 @@ const Newspaper = ({ progress }: { progress: number }) => {
             }}
           >
             DIJUAL
-          </Text>
+          </StyledText>
         </div>
 
         {/* Sub-headline */}
@@ -154,9 +168,9 @@ const Newspaper = ({ progress }: { progress: number }) => {
             zIndex: 10,
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Playfair Display",
+              fontFamily: "Playfair Display, serif",
               fontSize: "22px",
               fontWeight: "bold",
               lineHeight: 1.3,
@@ -164,7 +178,7 @@ const Newspaper = ({ progress }: { progress: number }) => {
             }}
           >
             Kontrak Rahasia Pemerintah Prancis
-          </Text>
+          </StyledText>
         </div>
 
         {/* Key detail: "Biaya Perbaikan: 250 Juta Franc" - MUST be 40px+ from all edges */}
@@ -183,9 +197,9 @@ const Newspaper = ({ progress }: { progress: number }) => {
             boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Oswald",
+              fontFamily: "Oswald, sans-serif",
               fontSize: "28px",
               fontWeight: "700",
               lineHeight: 1.2,
@@ -195,7 +209,7 @@ const Newspaper = ({ progress }: { progress: number }) => {
             }}
           >
             Biaya Perbaikan: 250 Juta Franc
-          </Text>
+          </StyledText>
         </div>
 
         {/* Body text lines */}
@@ -208,9 +222,9 @@ const Newspaper = ({ progress }: { progress: number }) => {
             zIndex: 10,
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Noto Serif",
+              fontFamily: "Noto Serif, serif",
               fontSize: "16px",
               lineHeight: 1.6,
               color: "#1a1a1a",
@@ -220,7 +234,7 @@ const Newspaper = ({ progress }: { progress: number }) => {
             La Tour Eiffel, symbole de la grandeur française, nécessite des
             réparations urgentes. La rouille menace la structure de 7 300 tonnes.
             Le gouvernement cherche un acheteur pour la démolition.
-          </Text>
+          </StyledText>
         </div>
 
         <div
@@ -232,9 +246,9 @@ const Newspaper = ({ progress }: { progress: number }) => {
             zIndex: 10,
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Noto Serif",
+              fontFamily: "Noto Serif, serif",
               fontSize: "16px",
               lineHeight: 1.6,
               color: "#1a1a1a",
@@ -243,7 +257,7 @@ const Newspaper = ({ progress }: { progress: number }) => {
           >
             M. Lustig, homme d'affaires avisé, voit une opportunité unique.
             Six marchands de fer déjà contactés pour soumission confidentielle.
-          </Text>
+          </StyledText>
         </div>
 
         {/* Decorative line */}
@@ -270,16 +284,16 @@ const Newspaper = ({ progress }: { progress: number }) => {
             zIndex: 10,
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Playfair Display",
+              fontFamily: "Playfair Display, serif",
               fontSize: "14px",
               lineHeight: 1.4,
               color: "#333333",
             }}
           >
             Prix: 25 centimes • 8 Pages • Dépôt Légal
-          </Text>
+          </StyledText>
         </div>
 
         {/* Paper texture overlay */}
@@ -417,9 +431,9 @@ const StreetGround = ({ progress }: { progress: number }) => {
             boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
           }}
         >
-          <Text
+          <StyledText
             style={{
-              fontFamily: "Playfair Display",
+              fontFamily: "Playfair Display, serif",
               fontSize: "18px",
               fontWeight: "bold",
               color: "#fff",
@@ -429,7 +443,7 @@ const StreetGround = ({ progress }: { progress: number }) => {
             }}
           >
             BOULANGERIE
-          </Text>
+          </StyledText>
         </div>
       </div>
     </AbsoluteFill>
@@ -526,9 +540,9 @@ export const MoneyStory = () => {
               backdropFilter: "blur(4px)",
             }}
           >
-            <Text
+            <StyledText
               style={{
-                fontFamily: "Oswald",
+                fontFamily: "Oswald, sans-serif",
                 fontSize: "28px",
                 fontWeight: "700",
                 lineHeight: 1.2,
@@ -541,7 +555,7 @@ export const MoneyStory = () => {
               }}
             >
               MENARA EIFFEL BERKARAT • BIAYA PERBAIKAN 250 JUTA FRANC
-            </Text>
+            </StyledText>
           </div>
         </AbsoluteFill>
       )}
