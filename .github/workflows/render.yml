@@ -8,7 +8,7 @@ on:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,18 +53,37 @@ jobs:
       - name: Build bundle
         run: npm run build
 
-      - name: Render scene 1 still (mid-frame 44)
+      - name: Render all 14 scene stills (mid-frame)
         run: |
-          npx remotion still MoneyStory out/scene-01-mid.png --frame=44 --props=./data/props.json --overwrite
+          for scene in scene-01 scene-02 scene-03 scene-04 scene-05 scene-06 scene-07 scene-08 scene-09 scene-10 scene-11 scene-12 scene-13 scene-14; do
+            echo "Rendering ${scene} still (mid-frame)..."
+            npx remotion still MoneyStory out/${scene}-mid.png --frame=$(node -e "console.log([44,134,239,344,449,569,674,764,854,959,1064,1154,1244,1544].includes(parseInt('${scene}'[5])) ? parseInt('${scene}'[5]) : 45)") --props=./data/props.json --overwrite
+          done
+
+      - name: Render full video
+        run: npx remotion render MoneyStory out/video.mp4 --props=./data/props.json --concurrency=2
 
       - name: Verify output
         run: |
-          ls -la out/scene-01-mid.png
-          file out/scene-01-mid.png
+          ls -la out/video.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,duration -of csv=p=0 out/video.mp4
 
-      - name: Upload artifact
+      - name: Extract check frames
+        run: |
+          ffmpeg -v error -ss 5 -i out/video.mp4 -frames:v 1 out/check_5s.png
+          ffmpeg -v error -ss 30 -i out/video.mp4 -frames:v 1 out/check_30s.png
+          ffmpeg -v error -ss 55 -i out/video.mp4 -frames:v 1 out/check_55s.png
+
+      - name: Upload video artifact
         uses: actions/upload-artifact@v4
         with:
-          name: scene-01-still
-          path: out/scene-01-mid.png
+          name: money-story-video
+          path: out/video.mp4
+          retention-days: 30
+
+      - name: Upload check frames artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: check-frames
+          path: out/check_*.png
           retention-days: 30
