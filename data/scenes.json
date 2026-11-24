@@ -1,0 +1,424 @@
+{
+  "composition": {
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "durationInFrames": 1800,
+    "durationInSeconds": 60
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "name": "Judul Koran",
+      "startFrame": 0,
+      "endFrame": 89,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 44,
+      "narration": "Pagi 1925. Koran Paris berteriak: Menara Eiffel berkarat, biaya perbaikan melonjak.",
+      "subtitle": "MENARA EIFFEL BERKARAT • BIAYA PERBAIKAN MELONJAK",
+      "heroElement": "newspaper",
+      "background": "paris-morning-sky",
+      "characters": [],
+      "props": ["newspaper-large", "coffee-cup", "bakery-awning"],
+      "notes": "Full-bleed newspaper front page as hero, 60%+ frame height. Paris street level as ground layer with 2+ props."
+    },
+    {
+      "id": "scene-02",
+      "name": "Victor Lustig",
+      "startFrame": 90,
+      "endFrame": 179,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 134,
+      "narration": "Victor Lustig, penalip paling brilian, membaca berita itu sambil tersenyum tipis.",
+      "subtitle": "VICTOR LUSTIG: PENALIP PALING BRILIAN",
+      "heroElement": "victor-character",
+      "background": "cafe-interior",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "center",
+          "scale": 0.45,
+          "expression": "smirk",
+          "accessories": ["hat", "newspaper-folded"]
+        }
+      ],
+      "props": ["cafe-table", "chair", "coffee-cup", "folded-newspaper", "window-paris"],
+      "notes": "Victor at 45% frame height (~576px), centered. Cafe interior background with window showing Paris."
+    },
+    {
+      "id": "scene-03",
+      "name": "Hotel Mewah - 6 Dealer",
+      "startFrame": 180,
+      "endFrame": 299,
+      "durationFrames": 120,
+      "durationSeconds": 4,
+      "midFrame": 239,
+      "narration": "Hotel mewah Paris. Enam dealer besi bersemi di ruangan berluster, menunggu 'kontrak rahasia'.",
+      "subtitle": "HOTEL MEWAH • 6 DEALER BESI MENUNGGU KONTRAK RAHASIA",
+      "heroElement": "hotel-chandelier",
+      "background": "hotel-ballroom",
+      "characters": [
+        {
+          "id": "dealer-1",
+          "role": "dealer",
+          "position": "left-1",
+          "scale": 0.35,
+          "expression": "neutral"
+        },
+        {
+          "id": "dealer-2",
+          "role": "dealer",
+          "position": "left-2",
+          "scale": 0.35,
+          "expression": "neutral"
+        },
+        {
+          "id": "dealer-3",
+          "role": "dealer",
+          "position": "left-3",
+          "scale": 0.35,
+          "expression": "neutral"
+        },
+        {
+          "id": "dealer-4",
+          "role": "dealer",
+          "position": "right-1",
+          "scale": 0.35,
+          "expression": "neutral"
+        },
+        {
+          "id": "dealer-5",
+          "role": "dealer",
+          "position": "right-2",
+          "scale": 0.35,
+          "expression": "neutral"
+        },
+        {
+          "id": "dealer-6",
+          "role": "dealer",
+          "position": "right-3",
+          "scale": 0.35,
+          "expression": "neutral"
+        },
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "center",
+          "scale": 0.4,
+          "expression": "smirk",
+          "accessories": ["hat"]
+        }
+      ],
+      "props": ["crystal-chandelier", "mahogany-table", "secret-document", "champagne-glasses", "velvet-curtains", "gold-mirror"],
+      "notes": "Large chandelier as hero (60%+ height). 6 dealers in 3-left/3-right formation, Victor center with hat. Ballroom floor + 4+ props."
+    },
+    {
+      "id": "scene-04",
+      "name": "7000 Ton Besi - Rahasia",
+      "startFrame": 300,
+      "endFrame": 389,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 344,
+      "narration": "7.000 ton besi. Kontrak dijual sebagai rahasia negara. Dealer ke-2 tertarik, tangan mengangkat dokumen.",
+      "subtitle": "7.000 TON BESI • KONTRAK RAHASIA NEGARA",
+      "heroElement": "secret-document",
+      "background": "hotel-ballroom",
+      "characters": [
+        {
+          "id": "dealer-2",
+          "role": "dealer",
+          "position": "left-2",
+          "scale": 0.4,
+          "expression": "concerned"
+        },
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "center",
+          "scale": 0.4,
+          "expression": "smirk",
+          "accessories": ["hat"]
+        }
+      ],
+      "props": ["secret-document-large", "mahogany-table", "chandelier", "champagne-glasses", "velvet-curtains"],
+      "notes": "Document scaled up as hero element (60%+ height). Dealer-2 highlighted reaching for it. Victor center smirking."
+    },
+    {
+      "id": "scene-05",
+      "name": "Poisson - Dealer Baru",
+      "startFrame": 390,
+      "endFrame": 509,
+      "durationFrames": 120,
+      "durationSeconds": 4,
+      "midFrame": 449,
+      "narration": "Poisson, dealer baru, ambisius tapi ragu. Lustig membaca kelemahan itu seperti buku terbuka.",
+      "subtitle": "POISSON: DEALER BARU, AMBISIUS TAPI RAGU",
+      "heroElement": "poisson-character",
+      "background": "hotel-ballroom",
+      "characters": [
+        {
+          "id": "poisson",
+          "role": "dealer",
+          "position": "left-center",
+          "scale": 0.42,
+          "expression": "concerned"
+        },
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "right-center",
+          "scale": 0.42,
+          "expression": "smirk",
+          "accessories": ["hat"]
+        }
+      ],
+      "props": ["mahogany-table", "document-folder", "chandelier", "champagne-glass", "pocket-watch"],
+      "notes": "Two-character scene: Poisson left (concerned), Victor right (smirking with hat). Hotel props between them."
+    },
+    {
+      "id": "scene-06",
+      "name": "Suap = Bukti Keaslian",
+      "startFrame": 510,
+      "endFrame": 629,
+      "durationFrames": 120,
+      "durationSeconds": 4,
+      "midFrame": 569,
+      "narration": "Suap diberikan. Bukan korupsi — bukti keaslian kontrak. Tangan Lustig mengayunkan amplop ke Poisson.",
+      "subtitle": "SUAP = BUKTI KEASLIAN KONTRAK",
+      "heroElement": "envelope-bribe",
+      "background": "hotel-ballroom",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "right-center",
+          "scale": 0.45,
+          "expression": "smirk",
+          "accessories": ["hat", "envelope"]
+        },
+        {
+          "id": "poisson",
+          "role": "dealer",
+          "position": "left-center",
+          "scale": 0.42,
+          "expression": "surprised"
+        }
+      ],
+      "props": ["envelope-large", "mahogany-table", "chandelier", "champagne-glasses", "document-folder"],
+      "notes": "Large envelope as hero element passed from Victor to Poisson. Hotel ballroom background maintained."
+    },
+    {
+      "id": "scene-07",
+      "name": "Koper Penuh Uang - Ke Vienna",
+      "startFrame": 630,
+      "endFrame": 719,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 674,
+      "narration": "Koper penuh uang. Lustig pergi ke Vienna, meninggalkan Paris dan 6 dealer yang tertipu.",
+      "subtitle": "KOPER PENUH UANG • BERANGKAT KE VIENNA",
+      "heroElement": "briefcase-money",
+      "background": "train-station",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "center",
+          "scale": 0.45,
+          "expression": "smile",
+          "accessories": ["hat", "briefcase-open"]
+        }
+      ],
+      "props": ["briefcase-large-money", "steam-train", "platform-clock", "luggage-cart", "steam-clouds", "station-sign-vienna"],
+      "notes": "Open briefcase with money floating as hero (60%+ height). Train station background with steam train. Victor confident with hat."
+    },
+    {
+      "id": "scene-08",
+      "name": "Polisi - Tidak Lapor Malu",
+      "startFrame": 720,
+      "endFrame": 809,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 764,
+      "narration": "Poisson di kantor polisi. Malu tertipu, ia memilih diam. 'Tidak lapor.' Lustig aman.",
+      "subtitle": "POISSON DI POLISI • MALU • TIDAK LAPOR",
+      "heroElement": "police-station-sign",
+      "background": "police-station",
+      "characters": [
+        {
+          "id": "poisson",
+          "role": "dealer",
+          "position": "center-left",
+          "scale": 0.42,
+          "expression": "concerned"
+        }
+      ],
+      "props": ["police-desk", "police-sign-large", "filing-cabinet", "wanted-poster", "officer-silhouette", "door-exit"],
+      "notes": "Police station sign as hero. Poisson centered-left looking concerned with speech bubble 'Malu... Tidak lapor.' Officer silhouette in background."
+    },
+    {
+      "id": "scene-09",
+      "name": "1 Bulan Kemudian - Dealer Baru",
+      "startFrame": 810,
+      "endFrame": 899,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 854,
+      "narration": "Satu bulan kemudian. Lustig kembali ke Paris. Dealer baru. Pola yang sama. Uang yang sama.",
+      "subtitle": "1 BULAN KEMUDIAN • DEALER BARU • POLA YANG SAMA",
+      "heroElement": "calendar-page",
+      "background": "hotel-ballroom",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "center",
+          "scale": 0.45,
+          "expression": "smirk",
+          "accessories": ["hat"]
+        },
+        {
+          "id": "new-dealer",
+          "role": "dealer",
+          "position": "left-center",
+          "scale": 0.4,
+          "expression": "neutral"
+        }
+      ],
+      "props": ["calendar-page-flip", "mahogany-table", "chandelier", "document-folder", "champagne-glasses", "velvet-curtains"],
+      "notes": "Calendar page flipping as hero element showing '1 BULAN KEMUDIAN'. Victor center, new dealer left. Hotel ballroom reused."
+    },
+    {
+      "id": "scene-10",
+      "name": "2x Lebih Cepat - Uang Lagi",
+      "startFrame": 900,
+      "endFrame": 1019,
+      "durationFrames": 120,
+      "durationSeconds": 4,
+      "midFrame": 959,
+      "narration": "Kali ini 2x lebih cepat. Suap lebih besar. Uang mengalir lebih deras. Lustig tidak henti.",
+      "subtitle": "2x LEBIH CEPAT • SUAP LEBIH BESAR • UANG BERTAMBAL",
+      "heroElement": "speed-lines-money",
+      "background": "hotel-ballroom",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "center",
+          "scale": 0.45,
+          "expression": "smile",
+          "accessories": ["hat"]
+        },
+        {
+          "id": "dealer-fast",
+          "role": "dealer",
+          "position": "left-center",
+          "scale": 0.4,
+          "expression": "surprised"
+        }
+      ],
+      "props": ["money-flow-lines", "briefcase-stack", "timer-2x", "chandelier", "mahogany-table", "champagne-tower"],
+      "notes": "Speed lines with money as hero element (60%+ height). '2x' badge prominent. Victor center, dealer surprised. Faster pace visual."
+    },
+    {
+      "id": "scene-11",
+      "name": "Split: Hotel vs Polisi - Kali Ini Lapor",
+      "startFrame": 1020,
+      "endFrame": 1109,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 1064,
+      "narration": "Dealer kali ini tidak diam. Hotel kiri, polisi kanan. Garis emas memisah. 'Lapor ke polisi!'",
+      "subtitle": "KALI INI: DEALER LAPOR KE POLISI",
+      "heroElement": "split-divider-gold",
+      "background": "split-hotel-police",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "left-panel",
+          "scale": 0.4,
+          "expression": "concerned",
+          "accessories": ["hat"]
+        },
+        {
+          "id": "dealer-report",
+          "role": "dealer",
+          "position": "right-panel",
+          "scale": 0.4,
+          "expression": "concerned"
+        },
+        {
+          "id": "officer",
+          "role": "police",
+          "position": "right-panel",
+          "scale": 0.38,
+          "expression": "neutral"
+        }
+      ],
+      "props": ["gold-divider-line", "hotel-panel-bg", "police-panel-bg", "document-evidence", "handcuffs", "gavel"],
+      "notes": "TRUE split-screen 50/50 with gold divider. Left: hotel ballroom with Victor concerned. Right: police station with dealer reporting. Both panels overflow:hidden with own padding."
+    },
+    {
+      "id": "scene-12",
+      "name": "Kapal ke Mark Selanjutnya: Al Capone",
+      "startFrame": 1110,
+      "endFrame": 1199,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 1154,
+      "narration": "Lustig kabur ke Amerika. Kapal melintas Atlantik. Mark selanjutnya: Al Capone, raja Chicago.",
+      "subtitle": "KAPAL KE AMERIKA • MARK SELANJUTNYA: AL CAPONE",
+      "heroElement": "ocean-liner",
+      "background": "ocean-atlantik",
+      "characters": [
+        {
+          "id": "victor",
+          "role": "protagonist",
+          "position": "deck-center",
+          "scale": 0.4,
+          "expression": "smirk",
+          "accessories": ["hat", "briefcase"]
+        }
+      ],
+      "props": ["ocean-liner-large", "atlantic-waves", "seagulls", "horizon-sunset", "ship-railing", "steam-funnel"],
+      "notes": "Ocean liner as hero element (60%+ frame height). Victor on deck with briefcase. Atlantic waves + sunset horizon. Ship railing as foreground prop."
+    },
+    {
+      "id": "scene-13",
+      "name": "Menara Eiffel Malam - Masih Berdiri",
+      "startFrame": 1200,
+      "endFrame": 1289,
+      "durationFrames": 90,
+      "durationSeconds": 3,
+      "midFrame": 1244,
+      "narration": "Menara Eiffel masih berdiri megah di Paris. Belum pernah dijual — secara resmi.",
+      "subtitle": "MENARA EIFFEL MASIH BERDIRI • BELUM PERNAH DIJUAL SECARA RESMI",
+      "heroElement": "eiffel-tower-night",
+      "background": "paris-night-sky",
+      "characters": [],
+      "props": ["eiffel-tower-glowing", "seine-river-reflection", "paris-rooftops", "street-lamps", "stars-sparkle", "moon-glow"],
+      "notes": "Eiffel Tower at night as hero (80%+ frame height, glowing). Seine river reflection. Paris rooftops foreground. Stars + moon."
+    },
+    {
+      "id": "scene-14",
+      "name": "CTA - Follow Cerita Uang",
+      "startFrame": 1290,
+      "endFrame": 1799,
+      "durationFrames": 510,
+      "durationSeconds": 17,
+      "midFrame": 1544,
+      "narration": "Ikuti @wealthstock.id untuk cerita uang lain yang tak kalah gila. Follow untuk update.",
+      "subtitle": "FOLLOW UNTUK CERITA UANG LAINNYA",
+      "heroElement": "money-bag-icon",
+      "background": "gradient-dark-gold",
+      "characters": [],
+      "props": ["money-bag-large", "sparkle-particles", "follow-button", "handle-text", "coin-stack", "gold-glow"],
+      "notes": "Large money bag icon as hero (60%+ height). Dark gradient background with gold accents. CTA text centered in safe area. Handle @wealthstock.id prominent."
+    }
+  ]
+}
