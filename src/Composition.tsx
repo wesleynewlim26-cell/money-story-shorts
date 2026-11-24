@@ -30,6 +30,18 @@ const calculateMetadata: CalculateMetadataFunction<Props> = () => {
   };
 };
 
+interface SceneData {
+  id: string;
+  name: string;
+  narration: string;
+  subtitle: string;
+  heroElement: string;
+  background: string;
+  characters: any[];
+  props: string[];
+  notes: string;
+}
+
 // Scene start/end frames from scenes.json
 const SCENES = [
   { id: "scene-01", start: 0, end: 89, mid: 44 },
@@ -231,10 +243,12 @@ const HeroBadge = ({
 const Scene = ({
   sceneId,
   progress,
+  frame,
   sceneData,
 }: {
   sceneId: string;
   progress: number;
+  frame: number;
   sceneData: SceneData;
 }) => {
   const sceneIndex = SCENES.findIndex((s) => s.id === sceneId);
@@ -1028,6 +1042,7 @@ export const MoneyStory = () => {
       <Scene
         sceneId={SCENES[0].id}
         progress={progress}
+        frame={frame}
         sceneData={SCENES[0]}
       />
     </AbsoluteFill>
